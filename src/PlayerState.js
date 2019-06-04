@@ -1,5 +1,3 @@
-const Serialize = require('./protocol/Serialize')
-
 const Basic = class PlayerBasicState {
   static turn(self, x, y) {
     if (!self.roomId) return

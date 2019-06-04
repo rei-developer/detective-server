@@ -1,18 +1,18 @@
-const { ModeType, MapType } = require('./library/const')
+const {
+  ModeType,
+  MapType
+} = require('./library/const')
 const Serialize = require('./protocol/Serialize')
-const RescueMode = require('./mode/RescueMode')
-const InfectMode = require('./mode/InfectMode')
+const DetectiveMode = require('./mode/DetectiveMode')
 const Event = require('./Event')
 
 module.exports = class GameMode {
   constructor(roomId) {
     this.roomId = roomId
-    this.map = MapType.TATAMI //MapType.ASYLUM + parseInt(Math.random() * MapType.DESERT)
+    this.map = MapType.ISLAND
     this.count = 0
     this.type = 0
     this.room = Room.get(this.roomId)
-
-    const range = 6
     const objects = require('../Assets/Mods/Eve000.json')[3]
     for (const object of objects) {
       const range = 3
@@ -20,9 +20,9 @@ module.exports = class GameMode {
         const event = new Event(this.roomId, object)
         const x = Math.floor(-range + Math.random() * (range * 2 + 1))
         const y = Math.floor(-range + Math.random() * (range * 2 + 1))
-        event.place = 42
-        event.x = 9 + x
-        event.y = 7 + y
+        event.place = 2
+        event.x = 8 + x
+        event.y = 13 + y
         this.room.addEvent(event)
         this.room.publishToMap(event.place, Serialize.CreateGameObject(event))
       }
@@ -31,32 +31,8 @@ module.exports = class GameMode {
 
   moveToBase(self) {
     switch (this.map) {
-      case MapType.ASYLUM:
-        self.teleport(2, 8, 13)
-        break
-      case MapType.TATAMI:
-        self.teleport(42, 9, 7)
-        break
-      case MapType.GON:
-        self.teleport(60, 16, 11)
-        break
-      case MapType.LABORATORY:
-        self.teleport(99, 10, 8)
-        break
-      case MapType.SCHOOL:
-        self.teleport(149, 14, 8)
-        break
-      case MapType.MINE:
-        self.teleport(154, 9, 8)
-        break
       case MapType.ISLAND:
-        self.teleport(199, 10, 8)
-        break
-      case MapType.MANSION:
-        self.teleport(215, 10, 9)
-        break
-      case MapType.DESERT:
-        self.teleport(249, 7, 17)
+        self.teleport(2, 8, 13)
         break
     }
   }
@@ -103,13 +79,10 @@ module.exports = class GameMode {
 
   update() {
     if (this.room.users.length >= 4) {
-      const mode = ModeType.RESCUE + parseInt(Math.random() * ModeType.INFECT)
+      const mode = ModeType.DETECTIVE // ModeType.RESCUE + parseInt(Math.random() * ModeType.INFECT)
       switch (mode) {
-        case ModeType.RESCUE:
-          this.room.changeMode(RescueMode)
-          break
-        case ModeType.INFECT:
-          this.room.changeMode(InfectMode)
+        case ModeType.DETECTIVE:
+          this.room.changeMode(DetectiveMode)
           break
       }
       return

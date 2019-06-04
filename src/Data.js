@@ -1,6 +1,8 @@
 const DB = require('./DB')
 const GameMap = require('./GameMap')
 
+const MAP_COUNT = 257
+
 module.exports = (function () {
   const _static = {
     rank: new Proxy({}, {
@@ -13,14 +15,14 @@ module.exports = (function () {
 
   return class Data {
     static async loadData() {
-      await Data.loadMaps(257)
+      await Data.loadMaps()
       await Data.loadRanks()
       await Data.loadClans()
     }
 
-    static async loadMaps(count) {
+    static async loadMaps() {
       console.log('맵 로딩중...')
-      for (let i = 1; i <= count; ++i) {
+      for (let i = 1; i <= MAP_COUNT; ++i) {
         const map = await GameMap.load(i)
         GameMap.add(map)
       }

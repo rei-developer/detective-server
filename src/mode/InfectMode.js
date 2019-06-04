@@ -1,6 +1,10 @@
-const Serialize = require('../protocol/Serialize')
-const { TeamType, ModeType, MapType } = require('../library/const')
+const {
+  TeamType,
+  ModeType,
+  MapType
+} = require('../library/const')
 const pix = require('../library/pix')
+const Serialize = require('../protocol/Serialize')
 const Event = require('../Event')
 const PlayerState = require('../PlayerState')
 

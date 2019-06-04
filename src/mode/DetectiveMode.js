@@ -13,7 +13,7 @@ const STATE_READY = 0
 const STATE_GAME = 1
 const STATE_RESULT = 3
 
-module.exports = class RescueMode {
+module.exports = class DetectiveMode {
   constructor(roomId) {
     this.roomId = roomId
     this.redTeam = []
