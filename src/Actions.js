@@ -138,7 +138,7 @@ class AkariState {
     const light = room.akari(self.place)
     const users = room.sameMapUsers(self.place)
     for (const user of users) {
-      if (user.state === PlayerState.Tansu) continue
+      if (user.state === PlayerState.Wardrobe) continue
       user.send(Serialize.PlaySound(light ? 'clap01' : 'clap00'))
       room.mode.drawAkari(user)
     }
@@ -153,7 +153,7 @@ class AkariState {
         const light = room.akari(context.place)
         const users = room.sameMapUsers(context.place)
         for (const user of users) {
-          if (user.state === PlayerState.Tansu) continue
+          if (user.state === PlayerState.Wardrobe) continue
           room.mode.drawAkari(user)
         }
       }
@@ -162,7 +162,7 @@ class AkariState {
   }
 }
 
-class TansuState {
+class WardrobeState {
   constructor(args = {}) {
     this.users = []
   }
@@ -172,12 +172,12 @@ class TansuState {
     const room = Room.get(context.roomId)
     if (!room) return
     const { mode } = room
-    if (self.game.team === TeamType.BLUE) {
-      if (self.state === PlayerState.Tansu) {
+    if (self.game.team === TeamType.CITIZEN) {
+      if (self.state === PlayerState.Wardrobe) {
         self.state = PlayerState.Basic
         self.send(Serialize.LeaveWardrobe())
         this.users.splice(this.users.indexOf(self), 1)
-        self.game.tansu = null
+        self.game.wardrobe = null
         self.publishToMap(Serialize.PlaySound('Close1'))
         self.broadcastToMap(Serialize.CreateGameObject(self))
         mode.drawAkari(self)
@@ -187,8 +187,8 @@ class TansuState {
           self.publishToMap(Serialize.PlaySound('Crash'))
           return
         }
-        self.setState('Tansu')
-        self.game.tansu = this
+        self.setState('Wardrobe')
+        self.game.wardrobe = this
         this.users.push(self)
         self.send(Serialize.EnterWardrobe())
         self.publishToMap(Serialize.PlaySound('Close1'))
@@ -200,7 +200,7 @@ class TansuState {
         const target = pix.sample(this.users, 1)[0]
         this.users.splice(this.users.indexOf(target), 1)
         if (target) {
-          target.game.tansu = null
+          target.game.wardrobe = null
           this.users.splice(this.users.indexOf(target), 1)
           mode.attack(self, target)
         }
@@ -307,14 +307,14 @@ class BoxState {
     const room = Room.get(context.roomId)
     if (!room) return
     const { mode } = room
-    if (self.game.team === TeamType.BLUE) {
+    if (self.game.team === TeamType.CITIZEN) {
       if (self.game.vaccine)
         return self.send(Serialize.InformMessage('<color=red>이미 보급품을 사용중입니다..</color>'))
       self.game.vaccine = true
       self.publish(Serialize.NoticeMessage('생존자 ' + self.name + (pix.maker(self.name) ? '가' : '이') + ' 보급품 획득!'))
     } else {
-      self.game.team = TeamType.BLUE
-      self.setGraphics(self.blueGraphics)
+      self.game.team = TeamType.CITIZEN
+      self.setGraphics(self.graphics)
       self.send(Serialize.SetGameTeam(self))
       mode.blueTeam.push(self)
       mode.redTeam.splice(mode.redTeam.indexOf(self), 1)
@@ -532,7 +532,7 @@ module.exports = new Proxy({
   tana: TanaState,
   obstacle: ObstacleState,
   akari: AkariState,
-  tansu: TansuState,
+  wardrobe: WardrobeState,
   rescue: RescueState,
   mania: ManiaState,
   rabbit: RabbitState,

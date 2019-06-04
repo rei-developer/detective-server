@@ -1,4 +1,8 @@
-const { TeamType, ModeType, MapType } = require('../library/const')
+const {
+  TeamType,
+  JobsType,
+  ModeType
+} = require('../library/const')
 const ToClient = require('./ToClient')
 
 const my = {}
@@ -24,8 +28,6 @@ my.UserData = function (user) {
   packet.rescue = user.rescue
   packet.survive = user.survive
   packet.graphics = user.graphics
-  packet.redGraphics = user.redGraphics
-  packet.blueGraphics = user.blueGraphics
   packet.admin = user.admin
   return JSON.stringify(packet)
 }
@@ -99,7 +101,7 @@ my.CreateGameObject = function (obj, hide = false) {
   packet.clanname = hide ? '' : (obj.clan && obj.clan.name || '')
   packet.type = obj.type
   packet.name = hide ? '' : obj.name
-  packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('team')) ? obj.game.team : TeamType.BLUE
+  packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('team')) ? obj.game.team : TeamType.CITIZEN
   packet.level = hide ? 0 : (obj.level || 0)
   packet.graphics = obj.graphics
   packet.x = obj.x
@@ -139,12 +141,21 @@ my.UpdateModeUserCount = function (count) {
   return JSON.stringify(packet)
 }
 
+my.SetGameJobs = function (obj) {
+  const packet = {}
+  packet._head = ToClient.SET_GAME_TEAM
+  packet.type = obj.type
+  packet.index = obj.index
+  packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('jobs')) ? obj.game.jobs : JobsType.EMPLOYEE
+  return JSON.stringify(packet)
+}
+
 my.SetGameTeam = function (obj) {
   const packet = {}
   packet._head = ToClient.SET_GAME_TEAM
   packet.type = obj.type
   packet.index = obj.index
-  packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('team')) ? obj.game.team : TeamType.BLUE
+  packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('team')) ? obj.game.team : TeamType.CITIZEN
   return JSON.stringify(packet)
 }
 
@@ -155,12 +166,15 @@ my.ModeData = function (mode) {
   packet.count = mode.count
   packet.maxCount = mode.maxCount
   switch (mode.type) {
-    case ModeType.RESCUE:
-      packet.hostage = mode.score.red
+    case ModeType.DETECTIVE:
+      
       break
+    /*case ModeType.RESCUE:
+      packet.hostage = mode.score.red
+      brea0k
     case ModeType.INFECT:
       packet.alive = mode.blueTeam.length
-      break
+      break*/
   }
   return JSON.stringify(packet)
 }
@@ -232,10 +246,10 @@ my.QuitGame = function () {
   return JSON.stringify(packet)
 }
 
-my.TempSkinBuy = function (blueGraphics, coin) {
+my.TempSkinBuy = function (graphics, coin) {
   const packet = {}
   packet._head = ToClient.TEMP_SKIN_BUY
-  packet.blueGraphics = blueGraphics
+  packet.graphics = graphics
   packet.coin = coin
   return JSON.stringify(packet)
 }

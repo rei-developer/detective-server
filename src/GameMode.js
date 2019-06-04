@@ -39,13 +39,13 @@ module.exports = class GameMode {
 
   join(self) {
     self.game = {}
-    self.setGraphics(self.blueGraphics)
+    self.setGraphics(self.graphics)
     this.moveToBase(self)
   }
 
   leave(self) {
     self.game = {}
-    self.setGraphics(self.blueGraphics)
+    self.setGraphics(self.graphics)
   }
 
   drawAkari(self) {
@@ -79,7 +79,7 @@ module.exports = class GameMode {
 
   update() {
     if (this.room.users.length >= 4) {
-      const mode = ModeType.DETECTIVE // ModeType.RESCUE + parseInt(Math.random() * ModeType.INFECT)
+      const mode = ModeType.DETECTIVE
       switch (mode) {
         case ModeType.DETECTIVE:
           this.room.changeMode(DetectiveMode)
@@ -88,7 +88,7 @@ module.exports = class GameMode {
       return
     } else {
       if (this.count % 100 === 0) {
-        this.room.publish(Serialize.NoticeMessage('4명부터 시작합니다. (' + this.room.users.length + '/' + this.room.max + '명)'))
+        this.room.publish(Serialize.NoticeMessage('4명 이상이어야 합니다. (' + this.room.users.length + '/' + this.room.max + '명)'))
       }
     }
     if (++this.count === 10000) this.count = 0

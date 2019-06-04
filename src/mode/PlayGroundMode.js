@@ -9,7 +9,7 @@ module.exports = class PlayGroundMode {
     this.tick = 0
     this.type = 3
     this.room = Room.get(this.roomId)
-    const objects = require('../Assets/Mods/Mod' + ('' + 0).padStart(3, '0') + '.json')[1]
+    const objects = require('../../Assets/Mods/Mod' + ('' + 0).padStart(3, '0') + '.json')[1]
     for (const object of objects) {
       const event = new Event(this.roomId, object)
       this.room.addEvent(event)
@@ -22,13 +22,13 @@ module.exports = class PlayGroundMode {
 
   join(self) {
     self.game = {}
-    self.setGraphics(self.blueGraphics)
+    self.setGraphics(self.graphics)
     self.teleport(79, 30, 62)
   }
 
   leave(self) {
     self.game = {}
-    self.setGraphics(self.blueGraphics)
+    self.setGraphics(self.graphics)
   }
 
   drawAkari(self) {

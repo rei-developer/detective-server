@@ -68,7 +68,7 @@ module.exports = {
   },
   async UpdateUser(user) {
     try {
-      await this.query('UPDATE users SET `uuid` = ?, `level` = ?, `exp` = ?, `coin` = ?, `escape` = ?, `kill` = ?, `death` = ?, `assist` = ?, `blast` = ?, `rescue` = ?, `rescue_combo` = ?, `survive` = ?, `red_graphics` = ?, `blue_graphics` = ?, `memo` = ?, `last_chat` = ? WHERE `id` = ?', [
+      await this.query('UPDATE users SET `uuid` = ?, `level` = ?, `exp` = ?, `coin` = ?, `escape` = ?, `kill` = ?, `death` = ?, `assist` = ?, `blast` = ?, `rescue` = ?, `rescue_combo` = ?, `survive` = ?, `graphics` = ?, `memo` = ?, `last_chat` = ? WHERE `id` = ?', [
         user.verify.uuid,
         user.level,
         user.exp,
@@ -81,8 +81,7 @@ module.exports = {
         user.rescue,
         user.rescueCombo,
         user.survive,
-        user.redGraphics,
-        user.blueGraphics,
+        user.graphics,
         user.memo,
         user.lastChatTime,
         user.id
@@ -94,7 +93,7 @@ module.exports = {
   },
   async FindMyClanByUserId(id) {
     try {
-      const [row] = await this.query('SELECT * FROM clan_members WHERE user_id = ?', [id])
+      const [row] = await this.query('SELECT * FROM clanMembers WHERE user_id = ?', [id])
       return row
     } catch (e) {
       console.error(e)
@@ -102,7 +101,7 @@ module.exports = {
   },
   async GetClanMembers(clanId) {
     try {
-      return await this.query('SELECT * FROM clan_members WHERE clan_id = ?', [clanId])
+      return await this.query('SELECT * FROM clanMembers WHERE clan_id = ?', [clanId])
     } catch (e) {
       console.error(e)
     }
@@ -112,7 +111,7 @@ module.exports = {
     try {
       await conn.beginTransaction()
       const row = await conn.query('INSERT INTO clans (master_id, name) VALUES (?, ?)', [masterId, clanname])
-      await conn.query('INSERT INTO clan_members (clan_id, user_id) VALUES (?, ?)', [row.insertId, masterId])
+      await conn.query('INSERT INTO clanMembers (clan_id, user_id) VALUES (?, ?)', [row.insertId, masterId])
       await conn.commit()
       return row
     } catch (e) {
@@ -124,28 +123,28 @@ module.exports = {
   },
   async FindInviteClan(clanId, userId) {
     try {
-      return await this.query('SELECT * FROM invite_clans WHERE clan_id = ? AND target_id = ?', [clanId, userId])
+      return await this.query('SELECT * FROM inviteClans WHERE clan_id = ? AND target_id = ?', [clanId, userId])
     } catch (e) {
       console.error(e)
     }
   },
   async ClearInviteClan(userId) {
     try {
-      await this.query('DELETE FROM invite_clans WHERE target_id = ?', [userId])
+      await this.query('DELETE FROM inviteClans WHERE target_id = ?', [userId])
     } catch (e) {
       console.error(e)
     }
   },
   async GetInviteClans(userId) {
     try {
-      return await this.query('SELECT * FROM invite_clans WHERE target_id = ?', [userId])
+      return await this.query('SELECT * FROM inviteClans WHERE target_id = ?', [userId])
     } catch (e) {
       console.error(e)
     }
   },
   async InviteClan(clanId, userId, targetId) {
     try {
-      await this.query('INSERT INTO invite_clans (clan_id, user_id, target_id) VALUES (?, ?, ?)', [clanId, userId, targetId])
+      await this.query('INSERT INTO inviteClans (clan_id, user_id, target_id) VALUES (?, ?, ?)', [clanId, userId, targetId])
       return true
     } catch (e) {
       console.error(e)
@@ -154,7 +153,7 @@ module.exports = {
 
   async EnterClan(clanId, userId) {
     try {
-      await this.query('INSERT INTO clan_members (clan_id, user_id) VALUES (?, ?)', [clanId, userId])
+      await this.query('INSERT INTO clanMembers (clan_id, user_id) VALUES (?, ?)', [clanId, userId])
       return true
     } catch (e) {
       console.error(e)
@@ -162,7 +161,7 @@ module.exports = {
   },
   async LeaveClan(userId) {
     try {
-      await this.query('DELETE FROM clan_members WHERE user_id = ?', [userId])
+      await this.query('DELETE FROM clanMembers WHERE user_id = ?', [userId])
       return true
     } catch (e) {
       console.error(e)
@@ -170,7 +169,7 @@ module.exports = {
   },
   async DeleteInviteClan(clanId) {
     try {
-      await this.query('DELETE FROM invite_clans WHERE clan_id = ?', [clanId])
+      await this.query('DELETE FROM inviteClans WHERE clan_id = ?', [clanId])
       return true
     } catch (e) {
       console.error(e)

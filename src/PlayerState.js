@@ -24,7 +24,7 @@ const Basic = class PlayerBasicState {
   }
 }
 
-const Tansu = class PlayerTansuState {
+const Wardrobe = class PlayerWardrobeState {
   static turn(self, x, y) {
 
   }
@@ -35,5 +35,5 @@ const Tansu = class PlayerTansuState {
 
 module.exports = {
   Basic,
-  Tansu
+  Wardrobe
 }

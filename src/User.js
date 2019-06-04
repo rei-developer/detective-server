@@ -46,8 +46,7 @@ global.User = (function () {
       this.rescue = 0
       this.rescueCombo = 0
       this.survive = 0
-      this.redGraphics = 'ao'
-      this.blueGraphics = 'Someok'
+      this.graphics = 'Someok'
       this.memo = ''
       this.lastChatTime = new Date()
       this.alert = 0
@@ -149,8 +148,7 @@ global.User = (function () {
       this.rescue = user.rescue
       this.rescueCombo = user.rescue_combo
       this.survive = user.survive
-      this.redGraphics = user.red_graphics
-      this.blueGraphics = user.blue_graphics
+      this.graphics = user.graphics
       this.memo = user.memo
       this.lastChatTime = new Date(user.last_chat)
       this.admin = user.admin
@@ -251,9 +249,9 @@ global.User = (function () {
 
       const i = Math.floor(Math.random() * skins.length)
 
-      this.blueGraphics = skins[i]
+      this.graphics = skins[i]
       this.coin -= 5000
-      this.send(Serialize.TempSkinBuy(this.blueGraphics, this.coin))
+      this.send(Serialize.TempSkinBuy(this.graphics, this.coin))
     }
 
     setState(state) {
