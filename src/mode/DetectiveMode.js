@@ -68,11 +68,11 @@ module.exports = class DetectiveMode {
     self.publish(Serialize.ModeData(this))
   }
 
-  /*drawAkari(self) {
+  drawAkari(self) {
     if (self.game.team === TeamType.CITIZEN) {
       self.send(Serialize.SwitchLight(this.room.places[self.place].akari))
     }
-  }*/
+  }
 
   drawEvents(self) {
     const { events } = this.room.places[self.place]
@@ -187,19 +187,25 @@ module.exports = class DetectiveMode {
             this.state = STATE_GAME
             const jobs = [...Array(8)].map((_, i) => i).sort(() => Math.random() - Math.random())
             this.users.map((user, index) => {
+              console.log(jobs[index])
               user.game.jobs = jobs[index]
               user.send(Serialize.SetGameJobs(user))
             })
-            const killer = pix.sample(this.users)
-            killer.game.team = TeamType.KILLER
-            if (killer.state === PlayerState.Wardrobe) {
-              killer.setState('Basic')
-              killer.send(Serialize.LeaveWardrobe())
-              this.drawAkari(killer)
-              killer.game.wardrobe.users.splice(killer.game.wardrobe.users.indexOf(killer), 1)
-              killer.game.wardrobe = null
+
+            console.log(jobs)
+
+            const killer = pix.sample(this.users)[0]
+            if (killer) {
+              killer.game.team = TeamType.KILLER
+              if (killer.state === PlayerState.Wardrobe) {
+                killer.setState('Basic')
+                killer.send(Serialize.LeaveWardrobe())
+                this.drawAkari(killer)
+                killer.game.wardrobe.users.splice(killer.game.wardrobe.users.indexOf(killer), 1)
+                killer.game.wardrobe = null
+              }
+              killer.send(Serialize.SetGameTeam(killer))
             }
-            killer.send(Serialize.SetGameTeam(killer))
             this.room.publish(Serialize.NoticeMessage('추리 시작'))
             this.room.publish(Serialize.PlaySound('A4'))
           }

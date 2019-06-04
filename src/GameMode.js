@@ -78,7 +78,7 @@ module.exports = class GameMode {
   }
 
   update() {
-    if (this.room.users.length >= 4) {
+    if (this.room.users.length >= 1) {
       const mode = ModeType.DETECTIVE
       switch (mode) {
         case ModeType.DETECTIVE:

@@ -55,7 +55,7 @@ class RescueState {
     if (!mode.caught) return self.send(Serialize.InformMessage('<color=#B5E61D>아직 인질을 구출할 수 없습니다.</color>'))
     if (mode.score.red < 1) return self.send(Serialize.InformMessage('<color=#B5E61D>붙잡힌 인질이 없습니다.</color>'))
     let count = 0
-    for (const red of mode.redTeam)
+    /*for (const red of mode.redTeam)
       mode.moveToKickOut(red)
     for (const blue of mode.blueTeam) {
       if (blue.game.caught) {
@@ -64,7 +64,7 @@ class RescueState {
         ++count
       }
     }
-    mode.score.red = 0
+    mode.score.red = 0*/
     mode.caught = false
     self.publish(Serialize.NoticeMessage(self.name + ' 인질 ' + count + '명 구출!'))
     self.publish(Serialize.PlaySound('Rescue'))
@@ -76,7 +76,7 @@ class RescueState {
   update(context) {
     if (++this.count % 10 == 0) {
       const { mode } = Room.get(context.roomId)
-      for (const red of mode.redTeam) {
+      /*for (const red of mode.redTeam) {
         if (red.place === context.place) {
           const range = Math.abs(red.x - context.x) + Math.abs(red.y - context.y)
           if (range > 2) continue
@@ -90,7 +90,7 @@ class RescueState {
             red.send(Serialize.PlaySound('Warn'))
           }
         }
-      }
+      }*/
       this.count = 0
     }
   }
@@ -304,7 +304,7 @@ class BoxState {
   }
 
   doAction(context, self) {
-    const room = Room.get(context.roomId)
+    /*const room = Room.get(context.roomId)
     if (!room) return
     const { mode } = room
     if (self.game.team === TeamType.CITIZEN) {
@@ -324,7 +324,7 @@ class BoxState {
     }
     self.publish(Serialize.PlaySound('squeaky'))
     context.publishToMap(Serialize.RemoveGameObject(context))
-    room.removeEvent(context)
+    room.removeEvent(context)*/
   }
 }
 
