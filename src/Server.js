@@ -165,6 +165,11 @@ module.exports = class Server {
 
     handler[ToServer.LEAVE_TRASH] = async () => user.leaveTrash()
 
+    handler[ToServer.SELECT_VOTE] = async data => {
+      const int32 = new Int32Array(data.buffer)
+      user.selectVote(int32[0])
+    }
+
     handler[ToServer.TEMP_SKIN_BUY] = async () => user.tempSkinBuy()
 
     handler[ToServer.LOGGER] = async data => console.log(utf8.decode(data))

@@ -75,11 +75,11 @@ global.Room = (function () {
           return target.hasOwnProperty(name) ? target[name] : target[name] = new Place(this.index, name)
         }
       })
-      this.max = 8
+      this.max = 10
       this.mode = null
       this.loop = null
       this.isRunning = false
-      this.nextEventUid = 1
+      this.nextEventIndex = 1
       this.lock = false
       this.start()
     }
@@ -97,7 +97,7 @@ global.Room = (function () {
 
     addEvent(event) {
       event.roomId = this.index
-      event.index = this.nextEventUid++
+      event.index = this.nextEventIndex++
       this.places[event.place].addEvent(event)
     }
 
@@ -164,9 +164,9 @@ global.Room = (function () {
         for (const event of events)
           if (event.collider && event.x === x && event.y === y)
             return false
-        for (const user of this.users)
+        /*for (const user of this.users)
           if (user.x === x && user.y === y)
-            return false
+            return false*/
       }
       return GameMap.get(place).isPassable(x, y, d)
     }
@@ -217,6 +217,10 @@ global.Room = (function () {
 
     leaveTrash(self) {
       this.mode.leaveTrash(self)
+    }
+
+    selectVote(self, index) {
+      this.mode.selectVote(self, index)
     }
 
     canJoin() {

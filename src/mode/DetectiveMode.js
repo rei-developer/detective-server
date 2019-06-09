@@ -7,10 +7,12 @@ const {
 const pix = require('../library/pix')
 const Serialize = require('../protocol/Serialize')
 const Event = require('../Event')
+const GameMap = require('../GameMap')
 const PlayerState = require('../PlayerState')
 
 const STATE_READY = 0
 const STATE_GAME = 1
+const STATE_VOTE = 2
 const STATE_RESULT = 3
 
 module.exports = class DetectiveMode {
@@ -21,12 +23,13 @@ module.exports = class DetectiveMode {
     this.users = []
     this.trash = []
     this.trashUsers = []
-    this.nextTrashUid = 0
-    this.count = 570
+    this.nextTrashIndex = 0
+    this.count = 600
     this.maxCount = 600
     this.deadCount = 0
     this.fuse = false
     this.corpses = 0
+    this.target = null
     this.tick = 0
     this.state = STATE_READY
     this.room = Room.get(this.roomId)
@@ -42,7 +45,8 @@ module.exports = class DetectiveMode {
       map: this.map,
       mode: ModeType.DETECTIVE,
       count: this.count,
-      maxCount: this.maxCount
+      maxCount: this.maxCount,
+      state: this.state
     }
   }
 
@@ -52,9 +56,11 @@ module.exports = class DetectiveMode {
       team: TeamType.CITIZEN,
       status: [],
       inventory: [],
-      nextItemUid: 0,
+      nextItemIndex: 0,
       hp: 100,
       count: 0,
+      pointed: 0,
+      vote: null,
       wardrobe: null,
       washer: false,
       sink: false,
@@ -74,6 +80,8 @@ module.exports = class DetectiveMode {
   }
 
   leave(self) {
+    if (self.hasOwnProperty('game') && self.game.hasOwnProperty('team') && self.game.team === TeamType.KILLER)
+      this.result(EndingType.CITIZEN)
     this.users.splice(this.users.indexOf(self), 1)
     this.trashUsers.splice(this.trashUsers.indexOf(self), 1)
     self.game = {}
@@ -88,12 +96,12 @@ module.exports = class DetectiveMode {
   moveToBase(self) {
     switch (this.map) {
       case MapType.ISLAND:
-        self.teleport(2, 8, 13)
+        self.teleport(173, 11, 9)
         break
     }
   }
 
-  moveToVotingStand(self) {
+  moveToVote(self) {
     switch (this.map) {
       case MapType.ISLAND:
         self.teleport(13, 11, 15)
@@ -135,7 +143,7 @@ module.exports = class DetectiveMode {
     return true
   }
 
-  addItem(self, id, num = 0) {
+  addItem(self, id, num = 0, inform = false) {
     if (self.game.inventory.length >= 8) {
       self.send(Serialize.InformMessage('<color=red>인벤토리가 꽉 찼습니다.</color>'))
       return false
@@ -152,7 +160,7 @@ module.exports = class DetectiveMode {
       self.send(Serialize.SetUpItem(item))
     } else {
       const newItem = {
-        index: self.game.nextItemUid++,
+        index: self.game.nextItemIndex++,
         id,
         num: newNum,
         icon: itemInfo.icon,
@@ -163,6 +171,10 @@ module.exports = class DetectiveMode {
       }
       self.game.inventory.push(newItem)
       self.send(Serialize.AddItem(self, newItem))
+      if (inform) {
+        self.send(Serialize.InformMessage(`<color=#B5E61D>${itemInfo.name} 획득!</color>`))
+        self.send(Serialize.PlaySound('thump'))
+      }
     }
     return true
   }
@@ -178,7 +190,7 @@ module.exports = class DetectiveMode {
     if (itemInfo.killer) {
       if (self.game.team === TeamType.KILLER) {
         if (this.deadCount > 0)
-          return self.publish(Serialize.InformMessage(`<color=red>${this.deadCount}초 후에 살해할 수 있습니다.</color>`))
+          return self.send(Serialize.InformMessage(`<color=red>${this.deadCount}초 후에 살해할 수 있습니다.</color>`))
       } else {
         return self.send(Serialize.InformMessage('<color=red>살인자 전용 도구입니다.</color>'))
       }
@@ -207,10 +219,10 @@ module.exports = class DetectiveMode {
       return
     const item = self.game.inventory[findIndex]
     if (!item)
-      return console.log("왜 막히지")
+      return
     const itemInfo = Item.get(item.id)
     const newItem = {
-      index: this.nextTrashUid++,
+      index: this.nextTrashIndex++,
       id: item.id,
       num: item.num,
       icon: itemInfo.icon,
@@ -246,7 +258,39 @@ module.exports = class DetectiveMode {
     if (!user)
       return
     this.trashUsers.splice(findIndex, 1)
-    this.publishToTrash(Serialize.RemoveUserTrash(self.index))
+    this.publishToTrash(Serialize.RemoveUserTrash(self.index, this.trashUsers.length))
+  }
+
+  selectVote(self, index) {
+    const findIndex = this.users.findIndex(user => user.index === index)
+    if (findIndex < 0)
+      return
+    const user = this.users[findIndex]
+    if (!user)
+      return
+    if (self.game.vote === user)
+      return
+    self.game.vote = user
+    ++user.game.pointed
+    this.room.publish(Serialize.SetUpVote(user))
+  }
+
+  randomSupply() {
+    const objects = require(`../../Assets/Events/1.json`)[1]
+    for (const object of objects) {
+      const range = 3
+      for (let i = 173; i <= 207; i++) {
+        const map = GameMap.get(i)
+        const event = new Event(this.roomId, object)
+        const x = Math.floor(-range + Math.random() * (range * 2) + 1)
+        const y = Math.floor(-range + Math.random() * (range * 2) + 1)
+        event.place = i
+        event.x = Math.floor(map.width / 2) + x
+        event.y = Math.floor(map.height / 2) + y
+        this.room.addEvent(event)
+        this.room.publishToMap(event.place, Serialize.CreateGameObject(event))
+      }
+    }
   }
 
   publishToKiller(data) {
@@ -266,15 +310,26 @@ module.exports = class DetectiveMode {
       user.send(data)
   }
 
+  vote(name) {
+    this.count = 50
+    this.state = STATE_VOTE
+    for (const user of this.users)
+      this.moveToVote(user)
+    this.room.publish(Serialize.NoticeMessage(`${name}님의 요청으로 추리를 시작하겠습니다.`))
+    this.room.publish(Serialize.PlaySound('squeaky'))
+  }
+
   result(ending) {
     this.state = STATE_RESULT
     const slice = this.room.users.slice(0)
     for (const user of slice) {
       if (ending === EndingType.KILLER && user.game.team === TeamType.KILLER)
-        user.score.sum += user.score.kill * 10
-      else if (ending === EndingType.CITIZEN && user.game.team === TeamType.CITIZEN)
-        user.score.sum += 100
-      else if (ending === EndingType.DRAW)
+        user.score.sum += user.score.kill * 20
+      else if (ending === EndingType.CITIZEN && user.game.team === TeamType.CITIZEN) {
+        if (user.game.vote === this.target)
+          user.score.sum += 50
+        user.score.sum += 50
+      } else if (ending === EndingType.DRAW)
         user.score.sum += 50
       user.roomId = 0
       user.game.result = true
@@ -327,6 +382,7 @@ module.exports = class DetectiveMode {
               for (let i = 0; i < 5; i++)
                 this.addItem(user, items[i] + 1)
             })
+            this.randomSupply()
             this.room.publish(Serialize.PlaySound('Shock'))
           }
           break
@@ -335,17 +391,37 @@ module.exports = class DetectiveMode {
             --this.deadCount
           if (this.corpses < 1 && this.count % 60 === 0)
             this.publishToKiller(Serialize.NoticeMessage(`${this.count}초 안에 첫살인을 마쳐야 합니다!!`))
-          if (this.corpses >= 1) // 5 || this.users.length < 3)
+          if (this.corpses >= 5 || this.users.length < 4)
             this.result(EndingType.KILLER)
           if (this.count === 5)
             this.room.publish(Serialize.PlaySound('Second'))
           else if (this.count === 0) {
-            if (this.corpses > 0)
-              this.count = 60
-            else
+            if (this.corpses < 1)
               this.result(EndingType.DRAW)
           }
           break
+        case STATE_VOTE:
+          if (this.count === 45) {
+            this.deadCount = 30
+            this.room.publish(Serialize.UpdateRoomModeInfo(this))
+            this.room.publish(Serialize.GetVote(this.users))
+          } else if (this.count === 15) {
+            this.room.publish(Serialize.CloseVote())
+            this.room.publish(Serialize.NoticeMessage('모든 사람들의 투표가 끝났습니다. 가장 많이 지목을 받은 사람은...'))
+          } else if (this.count === 10) {
+            const users = this.users.sort((a, b) => b.game.pointed - a.game.pointed)
+            this.target = users[0]
+            this.room.publish(Serialize.NoticeMessage(`<color=red>${this.target.name}</color> 바로 당신이야!! 당신이 이 살인사건의 범인이지??`))
+          } else if (this.count === 5) {
+            if (this.target.game.team === TeamType.KILLER) {
+              this.room.publish(Serialize.NoticeMessage('<color=red>이... 이럴수가... 내가 범인인걸 어떻게 알아냈지?</color>'))
+
+            } else {
+              this.room.publish(Serialize.NoticeMessage('<color=red>나는 도대체 당신이 무슨 말을 하는지 모르겠는데? 전혀 근거가 안 맞잖아?</color>'))
+
+            }
+          } else if (this.count === 0)
+            this.result(this.target.game.team === TeamType.KILLER ? EndingType.CITIZEN : EndingType.KILLER)
       }
       --this.count
     }

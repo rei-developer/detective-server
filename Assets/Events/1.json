@@ -1,12 +1,12 @@
 {
 	"1": [
 		{
-			"name": "보급품",
+			"name": "",
 			"place": 0,
 			"x": 0,
 			"y": 0,
 			"graphics": "Box",
-			"collider": false,
+			"collider": true,
 			"action": { "command": "box" }
 		}
 	],

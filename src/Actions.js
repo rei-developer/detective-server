@@ -45,6 +45,24 @@ class HingedDoorAction {
   }
 }
 
+class VoteAction {
+  constructor(args = {}) {
+    this.count = 0
+  }
+
+  doing(self, event) {
+    const room = Room.get(self.roomId)
+    if (room.mode.state !== 1)
+      return
+    if (room.mode.corpses < 3)
+      return self.send(Serialize.InformMessage('<color=red>3번째 살인 이후부터 투표가 가능합니다.</color>'))
+    const persons = room.places[self.place].users.length
+    if (persons < 3)
+      return self.send(Serialize.InformMessage('<color=red>이곳에 3명 이상이 모여야 투표가 가능합니다.</color>'))
+    room.mode.vote(self.name)
+  }
+}
+
 class FuseAction {
   constructor(args = {}) {
     this.count = 0
@@ -53,8 +71,7 @@ class FuseAction {
   doing(self, event) {
     const room = Room.get(self.roomId)
     const fuse = room.mode.fuse = !room.mode.fuse
-    const users = room.sameMapUsers(self.place)
-    for (const user of users) {
+    for (const user of room.mode.users) {
       if (user.state === PlayerState.Wardrobe)
         continue
       if (!room.mode.fuse)
@@ -72,7 +89,7 @@ class TrashAction {
     const room = Room.get(self.roomId)
     if (room.mode.trashUsers.indexOf(self) >= 0)
       return
-    room.mode.publishToTrash(Serialize.AddUserTrash(self))
+    room.mode.publishToTrash(Serialize.AddUserTrash(self, room.mode.trashUsers.length + 1))
     room.mode.trashUsers.push(self)
     self.send(Serialize.GetTrash(self, room.mode.trash, room.mode.trashUsers))
   }
@@ -269,32 +286,14 @@ class RescueAction {
 }
 
 class BoxAction {
-  constructor(args = {}) {
-
-  }
+  constructor(args = {}) { }
 
   doing(self, event) {
-    /*const room = Room.get(event.roomId)
-    if (!room) return
-    const { mode } = room
-    if (self.game.team === TeamType.CITIZEN) {
-      if (self.game.vaccine)
-        return self.send(Serialize.InformMessage('<color=red>이미 보급품을 사용중입니다..</color>'))
-      self.game.vaccine = true
-      self.publish(Serialize.NoticeMessage('생존자 ' + self.name + (pix.maker(self.name) ? '가' : '이') + ' 보급품 획득!'))
-    } else {
-      self.game.team = TeamType.CITIZEN
-      self.setGraphics(self.graphics)
-      self.send(Serialize.SetGameTeam(self))
-      mode.blueTeam.push(self)
-      mode.redTeam.splice(mode.redTeam.indexOf(self), 1)
-      // mode.moveToBase(self)
-      self.publish(Serialize.NoticeMessage(self.name + (pix.maker(self.name) ? '가' : '이') + ' 보급품 사용!'))
-      self.publish(Serialize.UpdateModeUserCount(mode.blueTeam.length))
-    }
-    self.publish(Serialize.PlaySound('squeaky'))
+    const room = Room.get(self.roomId)
+    const item = parseInt(Math.random() * Object.keys(Item.items).length) + 1
+    room.mode.addItem(self, item, 0, true)
     event.publishToMap(Serialize.RemoveGameObject(event))
-    room.removeEvent(event)*/
+    room.removeEvent(event)
   }
 }
 
@@ -348,8 +347,9 @@ class NpcAction {
         --event.deathCount
       if (event.deathCount === 1) {
         ++room.mode.corpses
-        room.mode.deadCount = 60
+        room.mode.deadCount = 30
         event.publish(Serialize.UpdateRoomModeInfo(room.mode))
+        event.collider = false
         event.graphics = `${event.graphics}_D`
         event.publishToMap(Serialize.SetGraphics(event))
         event.publish(Serialize.PlaySound(event.deathSound))
@@ -370,7 +370,7 @@ class NpcAction {
           event.y += dr[i][1]
         }
       }
-      if (this.count % 200 == 0) {
+      if (this.count % 500 == 0) {
         this.msgCount = (++this.msgCount) % this.message.length
         event.publishToMap(Serialize.ChatMessage(event.type, event.index, `<color=#B5E61D>${event.name}</color>`, this.message[this.msgCount]))
       }
@@ -474,6 +474,7 @@ class RabbitAction {
 module.exports = new Proxy({
   door: DoorAction,
   hingedDoor: HingedDoorAction,
+  vote: VoteAction,
   fuse: FuseAction,
   trash: TrashAction,
   light: LightAction,

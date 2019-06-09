@@ -1,9 +1,20 @@
 {
   "1": [
     {
+      "name": "추리대",
+      "place": 173,
+      "x": 11,
+      "y": 7,
+      "graphics": "kinkob",
+      "collider": true,
+      "action": {
+        "command": "vote"
+      }
+    },
+    {
       "name": "퓨즈",
-      "place": 2,
-      "x": 8,
+      "place": 183,
+      "x": 10,
       "y": 4,
       "graphics": "kinkob",
       "collider": true,
@@ -13,9 +24,75 @@
     },
     {
       "name": "쓰레기통",
-      "place": 2,
-      "x": 6,
-      "y": 4,
+      "place": 174,
+      "x": 12,
+      "y": 14,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "trash"
+      }
+    },
+    {
+      "name": "쓰레기통",
+      "place": 182,
+      "x": 11,
+      "y": 5,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "trash"
+      }
+    },
+    {
+      "name": "쓰레기통",
+      "place": 188,
+      "x": 8,
+      "y": 5,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "trash"
+      }
+    },
+    {
+      "name": "쓰레기통",
+      "place": 194,
+      "x": 8,
+      "y": 5,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "trash"
+      }
+    },
+    {
+      "name": "쓰레기통",
+      "place": 197,
+      "x": 10,
+      "y": 5,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "trash"
+      }
+    },
+    {
+      "name": "쓰레기통",
+      "place": 202,
+      "x": 12,
+      "y": 5,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "trash"
+      }
+    },
+    {
+      "name": "쓰레기통",
+      "place": 206,
+      "x": 7,
+      "y": 5,
       "graphics": "washer",
       "collider": true,
       "action": {
@@ -24,9 +101,9 @@
     },
     {
       "name": "세탁기",
-      "place": 2,
-      "x": 10,
-      "y": 4,
+      "place": 173,
+      "x": 5,
+      "y": 5,
       "graphics": "washer",
       "collider": true,
       "action": {
@@ -35,17 +112,17 @@
     },
     {
       "name": "박영호",
-      "place": 2,
+      "place": 179,
       "x": 10,
-      "y": 10,
+      "y": 6,
       "graphics": "PYH",
       "collider": true,
+      "detective": true,
       "deathSound": "scream3",
       "action": {
         "command": "npc",
         "arguments": {
           "message": [
-            "이누랜드 이 개새끼 ㅠㅠ",
             "살려줘...",
             "여기에서 난 나가야겠어.",
             "ㅡㅡ"
@@ -56,11 +133,12 @@
     },
     {
       "name": "임성준",
-      "place": 2,
-      "x": 12,
-      "y": 10,
+      "place": 189,
+      "x": 8,
+      "y": 7,
       "graphics": "PYH",
       "collider": true,
+      "detective": true,
       "deathSound": "scream4",
       "action": {
         "command": "npc",
@@ -77,18 +155,57 @@
       }
     },
     {
-      "name": "정혁찬",
-      "place": 2,
-      "x": 14,
+      "name": "정하윤",
+      "place": 199,
+      "x": 10,
+      "y": 8,
+      "graphics": "PYH",
+      "collider": true,
+      "detective": true,
+      "deathSound": "scream1",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "ㅎㅎ"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "김준태",
+      "place": 204,
+      "x": 8,
       "y": 10,
       "graphics": "PYH",
       "collider": true,
+      "detective": true,
+      "deathSound": "scream3",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "ㅋㅋㅋ"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "정혁찬",
+      "place": 202,
+      "x": 9,
+      "y": 6,
+      "graphics": "PYH",
+      "collider": true,
+      "detective": true,
       "deathSound": "scream2",
       "action": {
         "command": "npc",
         "arguments": {
           "message": [
-            "어케 하는데 븅신아"
+            "어케함"
           ],
           "fixed": false
         }

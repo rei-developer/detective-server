@@ -26,9 +26,9 @@ class LuminorMethod {
       const washedBlood = user.game.status.find(s => s === StatusType.WASHED_BLOOD)
       const result = blood || washedBlood ? true : false
       self.send(Serialize.UpdateRoomGameInfo('루미놀 검사 결과', result ? '양성' : '음성', `${user.name}의 몸을 루미놀 검사 지시약으로 판독해보니, ${result ? '혈흔이 묻혀진 것으로 판단된다.' : '아무런 이상이 없는 것으로 판단된다.'}`))
-      return self.publish(Serialize.PlaySound('result'))
+      return self.send(Serialize.PlaySound('result'))
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -54,9 +54,9 @@ class glovesMethod {
       if (dust)
         status.push('먼지')
       self.send(Serialize.UpdateRoomGameInfo('몸 수색 결과', status.length > 0 ? '의심 정황' : '이상 없음', `${user.name}의 몸을 수색해보니, ${status.length > 0 ? status.join(', ') + ' 등이 묻혀있다.' : '아무런 이상이 없는 것으로 판단된다.'}`))
-      return self.publish(Serialize.PlaySound('result'))
+      return self.send(Serialize.PlaySound('result'))
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -78,7 +78,7 @@ class authorizationMethod {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
       if (event.death < 1)
-        return self.publish(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
+        return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const itemInfo = Item.get(event.death)
       let flag = true
       let message = ''
@@ -106,9 +106,9 @@ class authorizationMethod {
           break
       }
       self.send(Serialize.UpdateRoomGameInfo('시신 부검 결과', flag ? '의심 정황' : '이상 없음', `${event.name}의 시신을 부검해보니, ${flag ? message : '외관상 특별한 것이 없다.'}`))
-      return self.publish(Serialize.PlaySound('result'))
+      return self.send(Serialize.PlaySound('result'))
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -122,7 +122,7 @@ class magnifyingMethod {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
       if (event.death < 1)
-        return self.publish(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
+        return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const itemInfo = Item.get(event.death)
       let flag = true
       let message = ''
@@ -150,9 +150,9 @@ class magnifyingMethod {
           break
       }
       self.send(Serialize.UpdateRoomGameInfo('돋보기 판단 결과', flag ? '의심 정황' : '이상 없음', `${event.name}의 시신의 주변을 살펴보니, ${flag ? message : '외관상 별다른 것이 없다.'}`))
-      return self.publish(Serialize.PlaySound('result'))
+      return self.send(Serialize.PlaySound('result'))
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -166,13 +166,13 @@ class poisonMethod {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
       if (event.death < 1)
-        return self.publish(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
+        return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const itemInfo = Item.get(event.death)
       const flag = itemInfo.type === DeathType.POISON
       self.send(Serialize.UpdateRoomGameInfo('독극물 판별 결과', flag ? '의심 정황' : '이상 없음', `어떤 독극물이 쓰였는지 ${event.name}의 시신을 판별해본 결과, ${flag ? itemInfo.name + (pix.maker(itemInfo.name) ? '를' : '을') + ' 쓴 것으로 확인되었다.' : '외관상 별다른 것이 없다.'}`))
-      return self.publish(Serialize.PlaySound('result'))
+      return self.send(Serialize.PlaySound('result'))
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -194,14 +194,14 @@ class plasticBagMethod {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
       if (event.death < 1)
-        return self.publish(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
+        return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       event.death = item.id
       event.graphics = `${event.pureGraphics}_D`
       event.publishToMap(Serialize.SetGraphics(event))
       self.send(Serialize.InformMessage('<color=red>살해 현장의 모든 증거를 흔적도 없이 지웠다.</color>'))
-      return self.publish(Serialize.PlaySound('result'))
+      return self.send(Serialize.PlaySound('result'))
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -224,8 +224,10 @@ class usePoisonMethod {
     for (const event of events) {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>살해할 수 있는 대상이 아닙니다.</color>'))
       if (event.death > 0)
-        return self.publish(Serialize.InformMessage('<color=red>대상이 이미 죽었거나 음독 상태입니다.</color>'))
+        return self.send(Serialize.InformMessage('<color=red>대상이 이미 죽었거나 음독 상태입니다.</color>'))
       self.send(Serialize.InformMessage(`<color=red>${event.name}에게 ${item.name}${(pix.maker(item.name) ? '를' : '을')} 강제로 먹였습니다.</color>`))
       self.publishToMap(Serialize.PlaySound('drink'))
       ++self.score.kill
@@ -233,7 +235,7 @@ class usePoisonMethod {
       event.deathCount = this.timer * 10
       return
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -248,13 +250,16 @@ class weaponMethod {
     for (const event of events) {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>살해할 수 있는 대상이 아닙니다.</color>'))
       if (event.death > 0)
-        return self.publish(Serialize.InformMessage('<color=red>대상이 이미 죽었거나 음독 상태입니다.</color>'))
+        return self.send(Serialize.InformMessage('<color=red>대상이 이미 죽었거나 음독 상태입니다.</color>'))
       ++room.mode.corpses
-      room.mode.deadCount = 60
+      room.mode.deadCount = 30
       self.publish(Serialize.UpdateRoomModeInfo(room.mode))
       self.send(Serialize.InformMessage(`<color=red>${event.name}${(pix.maker(event.name) ? '를' : '을')} ${item.name}${(pix.maker(item.name) ? '로' : '으로')} 죽였습니다.</color>`))
       ++self.score.kill
+      event.collider = false
       event.death = item.id
       if (this.weaponSound !== '')
         self.publish(Serialize.PlaySound(this.weaponSound))
@@ -267,7 +272,7 @@ class weaponMethod {
       }
       return event.publishToMap(Serialize.SetGraphics(event))
     }
-    self.publish(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 

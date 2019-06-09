@@ -21,6 +21,7 @@ module.exports = {
     'DROP_ITEM',
     'PICK_UP_TRASH',
     'LEAVE_TRASH',
+    'SELECT_VOTE',
     'TEMP_SKIN_BUY',
     'LOGGER'
   )

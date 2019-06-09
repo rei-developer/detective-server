@@ -71,6 +71,8 @@ module.exports = class PlayGroundMode {
 
   leaveTrash(self) { }
 
+  selectVote(self, index) { }
+
   spawnRabbit() {
     const range = 6
     const objects = require('../Assets/Mods/Eve000.json')[2]

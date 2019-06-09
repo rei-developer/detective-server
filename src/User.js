@@ -295,8 +295,7 @@ global.User = (function () {
       console.log(this.name + '(#' + this.roomId + '@' + this.place + '): ' + message)
       switch (room.type) {
         case RoomType.GAME:
-          if (this.game.team === TeamType.RED) this.redChat(message)
-          else this.blueChat(message)
+          this.chatting(message)
           break
         case RoomType.PLAYGROUND:
           this.publish(Serialize.ChatMessage(this.type, this.index, this.name, message))
@@ -420,13 +419,8 @@ global.User = (function () {
       }
     }
 
-    redChat(message) {
-      this.publish(Serialize.ChatMessage(this.type, this.index, `<color=#ED1C24>${this.name}</color>`, message))
-    }
-
-    blueChat(message) {
-      if (this.game.caught) this.publishToMap(Serialize.ChatMessage(this.type, this.index, `<color=#808080>${this.name}</color>`, message))
-      else this.publish(Serialize.ChatMessage(this.type, this.index, `<color=#00A2E8>${this.name}</color>`, message))
+    chatting(message) {
+      this.publish(Serialize.ChatMessage(this.type, this.index, `<color=#00A2E8>${this.name}</color>`, message))
     }
 
     entry(type = RoomType.GAME) {
@@ -469,6 +463,11 @@ global.User = (function () {
     leaveTrash() {
       if (!this.roomId) return
       Room.get(this.roomId).leaveTrash(this)
+    }
+
+    selectVote(index) {
+      if (!this.roomId) return
+      Room.get(this.roomId).selectVote(this, index)
     }
 
     portal(place, x, y, dx = 0, dy = 0) {

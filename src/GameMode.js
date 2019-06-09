@@ -4,7 +4,9 @@ const {
 } = require('./library/const')
 const Serialize = require('./protocol/Serialize')
 const DetectiveMode = require('./mode/DetectiveMode')
-const Event = require('./Event')
+// const Event = require('./Event')
+
+const MAX_PERSON = 4
 
 module.exports = class GameMode {
   constructor(roomId) {
@@ -84,8 +86,10 @@ module.exports = class GameMode {
     return true
   }
 
+  leaveTrash(self) { }
+
   update() {
-    if (this.room.users.length >= 1) {
+    if (this.room.users.length >= MAX_PERSON) {
       const mode = ModeType.DETECTIVE
       switch (mode) {
         case ModeType.DETECTIVE:
@@ -95,7 +99,7 @@ module.exports = class GameMode {
       return
     } else {
       if (this.count % 100 === 0)
-        this.room.publish(Serialize.NoticeMessage('4명 이상이어야 합니다. (' + this.room.users.length + '/' + this.room.max + '명)'))
+        this.room.publish(Serialize.NoticeMessage(MAX_PERSON + '명 이상이어야 합니다. (' + this.room.users.length + '/' + this.room.max + '명)'))
     }
     if (++this.count === 10000) this.count = 0
   }

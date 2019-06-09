@@ -9,6 +9,7 @@ module.exports = class Event extends Character {
     x,
     y,
     collider,
+    detective,
     deathSound,
     action
   } = {
@@ -18,6 +19,7 @@ module.exports = class Event extends Character {
       x: 0,
       y: 0,
       collider: false,
+      detective: false,
       deathSound: '',
       action: { command: '', arguments: {} }
     }) {
@@ -32,6 +34,7 @@ module.exports = class Event extends Character {
     this.x = x
     this.y = y
     this.collider = collider
+    this.detective = detective
     this.death = false
     this.deathCount = 0
     this.deathSound = deathSound

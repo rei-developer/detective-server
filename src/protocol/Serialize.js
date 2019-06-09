@@ -230,7 +230,7 @@ my.AddItem = function (self, item = []) {
   packet.icon = item.icon
   packet.name = item.name
   packet.description = item.description
-  packet.jobs = item.jobs ? (item.jobs.indexOf(self.game.jobs) >= 0 ? false : true) : false,
+  packet.jobs = item.jobs ? (item.jobs.indexOf(self.game.jobs) < 0 ? false : true) : true,
   packet.killer = item.killer
   return JSON.stringify(packet)
 }
@@ -267,8 +267,13 @@ my.GetTrash = function (self, trash = [], trashUsers = []) {
     icon: i.icon,
     name: i.name,
     description: i.description,
-    jobs: i.jobs ? (i.jobs.indexOf(self.game.jobs) >= 0 ? false : true) : false,
+    jobs: i.jobs ? (i.jobs.indexOf(self.game.jobs) < 0 ? false : true) : true,
     killer: i.killer
+  }))
+  packet.trashUsers = trashUsers.map(i => ({
+    index: i.index,
+    name: i.name,
+    no: (i.hasOwnProperty('game') && i.game.hasOwnProperty('no')) ? i.game.no : 0
   }))
   return JSON.stringify(packet)
 }
@@ -282,7 +287,7 @@ my.AddTrash = function (self, trash = []) {
   packet.icon = trash.icon
   packet.name = trash.name
   packet.description = trash.description
-  packet.jobs = trash.jobs ? (trash.jobs.indexOf(self.game.jobs) >= 0 ? false : true) : false,
+  packet.jobs = trash.jobs ? (trash.jobs.indexOf(self.game.jobs) < 0 ? false : true) : true,
   packet.killer = trash.killer
   return JSON.stringify(packet)
 }
@@ -294,19 +299,46 @@ my.RemoveTrash = function (index) {
   return JSON.stringify(packet)
 }
 
-my.AddUserTrash = function (user) {
+my.AddUserTrash = function (user, count) {
   const packet = {}
   packet._head = ToClient.ADD_USER_TRASH
   packet.index = user.index
   packet.name = user.name
   packet.no = (user.hasOwnProperty('game') && user.game.hasOwnProperty('no')) ? user.game.no : 0
+  packet.count = count
   return JSON.stringify(packet)
 }
 
-my.RemoveUserTrash = function (index) {
+my.RemoveUserTrash = function (index, count) {
   const packet = {}
   packet._head = ToClient.REMOVE_USER_TRASH
   packet.index = index
+  packet.count = count
+  return JSON.stringify(packet)
+}
+
+my.GetVote = function (users = []) {
+  const packet = {}
+  packet._head = ToClient.GET_VOTE
+  packet.users = users.map(i => ({
+    index: i.index,
+    name: i.name,
+    no: (i.hasOwnProperty('game') && i.game.hasOwnProperty('no')) ? i.game.no : 0
+  }))
+  return JSON.stringify(packet)
+}
+
+my.SetUpVote = function (user) {
+  const packet = {}
+  packet._head = ToClient.SET_UP_VOTE
+  packet.index = user.index
+  packet.pointed = (user.hasOwnProperty('game') && user.game.hasOwnProperty('pointed')) ? user.game.pointed : 0
+  return JSON.stringify(packet)
+}
+
+my.CloseVote = function () {
+  const packet = {}
+  packet._head = ToClient.CLOSE_VOTE
   return JSON.stringify(packet)
 }
 
