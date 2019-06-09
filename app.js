@@ -1,6 +1,7 @@
-require('./src/User')
-require('./src/Room')
 require('./src/Clan')
+require('./src/Item')
+require('./src/Room')
+require('./src/User')
 
 const lex = require('greenlock-koa').create({
   version: 'draft-11',
@@ -34,8 +35,8 @@ const androidpublisher = require('./src/api/androidpublisher')
 const app = new Koa()
 const router = new Router()
 
-const VERSION = '0.0.3'
-const PORT = 10003
+const VERSION = '0.1.2'
+const PORT = 10012
 
 router.get('/', ctx => {
   ctx.body = VERSION

@@ -9,7 +9,8 @@ module.exports = class Event extends Character {
     x,
     y,
     collider,
-    action,
+    deathSound,
+    action
   } = {
       name: '',
       graphics: '',
@@ -17,6 +18,7 @@ module.exports = class Event extends Character {
       x: 0,
       y: 0,
       collider: false,
+      deathSound: '',
       action: { command: '', arguments: {} }
     }) {
     super()
@@ -25,21 +27,23 @@ module.exports = class Event extends Character {
     this.roomId = roomId
     this.name = name
     this.graphics = graphics
+    this.pureGraphics = graphics
     this.place = place
     this.x = x
     this.y = y
     this.collider = collider
-    this.state = new Actions[action.command](action.arguments)
-    //if (action.command === '' || action.command === 'wardrobe') this.type = 3
-    // tpye 1: player, 2: event 3: event in underfoot
+    this.death = false
+    this.deathCount = 0
+    this.deathSound = deathSound
+    this.action = new Actions[action.command](action.arguments)
   }
 
-  doAction(self) {
-    this.state.doAction(this, self)
+  doing(self) {
+    this.action.doing(self, this)
   }
 
   update() {
-    this.state.update && this.state.update(this)
+    this.action.update && this.action.update(this)
   }
 
   getJSON() {

@@ -17,6 +17,10 @@ module.exports = {
     'CANCEL_CLAN',
     'JOIN_CLAN',
     'KICK_CLAN',
+    'USE_ITEM',
+    'DROP_ITEM',
+    'PICK_UP_TRASH',
+    'LEAVE_TRASH',
     'TEMP_SKIN_BUY',
     'LOGGER'
   )

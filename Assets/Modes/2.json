@@ -1,0 +1,109 @@
+{
+  "1": [
+    {
+      "name": "퓨즈",
+      "place": 2,
+      "x": 8,
+      "y": 4,
+      "graphics": "kinkob",
+      "collider": true,
+      "action": {
+        "command": "fuse"
+      }
+    },
+    {
+      "name": "쓰레기통",
+      "place": 2,
+      "x": 6,
+      "y": 4,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "trash"
+      }
+    },
+    {
+      "name": "세탁기",
+      "place": 2,
+      "x": 10,
+      "y": 4,
+      "graphics": "washer",
+      "collider": true,
+      "action": {
+        "command": "washer"
+      }
+    },
+    {
+      "name": "박영호",
+      "place": 2,
+      "x": 10,
+      "y": 10,
+      "graphics": "PYH",
+      "collider": true,
+      "deathSound": "scream3",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "이누랜드 이 개새끼 ㅠㅠ",
+            "살려줘...",
+            "여기에서 난 나가야겠어.",
+            "ㅡㅡ"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "임성준",
+      "place": 2,
+      "x": 12,
+      "y": 10,
+      "graphics": "PYH",
+      "collider": true,
+      "deathSound": "scream4",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "앙망군",
+            "영호니",
+            "ㅅㅅ",
+            "아몰랑그다",
+            "알아서 해라"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "정혁찬",
+      "place": 2,
+      "x": 14,
+      "y": 10,
+      "graphics": "PYH",
+      "collider": true,
+      "deathSound": "scream2",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "어케 하는데 븅신아"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "",
+      "place": 2,
+      "x": 13,
+      "y": 9,
+      "graphics": "arrow8",
+      "collider": false,
+      "action": {
+        "command": ""
+      }
+    }
+  ]
+}

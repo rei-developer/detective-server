@@ -101,8 +101,8 @@ my.CreateGameObject = function (obj, hide = false) {
   packet.clanname = hide ? '' : (obj.clan && obj.clan.name || '')
   packet.type = obj.type
   packet.name = hide ? '' : obj.name
+  packet.no = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('no')) ? obj.game.no : 0
   packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('team')) ? obj.game.team : TeamType.CITIZEN
-  packet.level = hide ? 0 : (obj.level || 0)
   packet.graphics = obj.graphics
   packet.x = obj.x
   packet.y = obj.y
@@ -134,19 +134,31 @@ my.UpdateRoomUserCount = function (count) {
   return JSON.stringify(packet)
 }
 
-my.UpdateModeUserCount = function (count) {
+my.UpdateRoomModeInfo = function (mode) {
   const packet = {}
-  packet._head = ToClient.UPDATE_MODE_USER_COUNT
-  packet.count = count
+  packet._head = ToClient.UPDATE_ROOM_MODE_INFO
+  packet.type = mode.type
+  switch (mode.type) {
+    case ModeType.DETECTIVE:
+      packet.deadCount = mode.deadCount
+      break
+  }
   return JSON.stringify(packet)
 }
 
-my.SetGameJobs = function (obj) {
+my.UpdateRoomGameInfo = function (label, title, description) {
   const packet = {}
-  packet._head = ToClient.SET_GAME_TEAM
-  packet.type = obj.type
-  packet.index = obj.index
-  packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('jobs')) ? obj.game.jobs : JobsType.EMPLOYEE
+  packet._head = ToClient.UPDATE_ROOM_GAME_INFO
+  packet.label = label
+  packet.title = title
+  packet.description = description
+  return JSON.stringify(packet)
+}
+
+my.SetGameNo = function (obj) {
+  const packet = {}
+  packet._head = ToClient.SET_GAME_NO
+  packet.no = obj.game.no
   return JSON.stringify(packet)
 }
 
@@ -159,23 +171,28 @@ my.SetGameTeam = function (obj) {
   return JSON.stringify(packet)
 }
 
+my.SetGameJobs = function (obj) {
+  const packet = {}
+  packet._head = ToClient.SET_GAME_JOBS
+  packet.type = obj.type
+  packet.index = obj.index
+  packet.jobs = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('jobs')) ? obj.game.jobs : JobsType.EMPLOYEE
+  return JSON.stringify(packet)
+}
+
+my.SetGameStatus = function (obj) {
+  const packet = {}
+  packet._head = ToClient.SET_GAME_STATUS
+  packet.status = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('status')) ? obj.game.status.map(item => ({ item })) : false
+  return JSON.stringify(packet)
+}
+
 my.ModeData = function (mode) {
   const packet = {}
   packet._head = ToClient.MODE_DATA
   packet.type = mode.type
-  packet.count = mode.count
-  packet.maxCount = mode.maxCount
-  switch (mode.type) {
-    case ModeType.DETECTIVE:
-      
-      break
-    /*case ModeType.RESCUE:
-      packet.hostage = mode.score.red
-      brea0k
-    case ModeType.INFECT:
-      packet.alive = mode.blueTeam.length
-      break*/
-  }
+  // packet.count = mode.count
+  // packet.maxCount = mode.maxCount
   return JSON.stringify(packet)
 }
 
@@ -204,16 +221,105 @@ my.InviteClan = function (invites) {
   return JSON.stringify(packet)
 }
 
+my.AddItem = function (self, item = []) {
+  const packet = {}
+  packet._head = ToClient.ADD_ITEM
+  packet.index = item.index
+  packet.id = item.id
+  packet.num = item.num
+  packet.icon = item.icon
+  packet.name = item.name
+  packet.description = item.description
+  packet.jobs = item.jobs ? (item.jobs.indexOf(self.game.jobs) >= 0 ? false : true) : false,
+  packet.killer = item.killer
+  return JSON.stringify(packet)
+}
+
+my.SetUpItem = function (item = []) {
+  const packet = {}
+  packet._head = ToClient.SET_UP_ITEM
+  packet.index = item.index
+  packet.num = item.num
+  return JSON.stringify(packet)
+}
+
+my.UseItem = function (index) {
+  const packet = {}
+  packet._head = ToClient.USE_ITEM
+  packet.index = index
+  return JSON.stringify(packet)
+}
+
+my.RemoveItem = function (index) {
+  const packet = {}
+  packet._head = ToClient.REMOVE_ITEM
+  packet.index = index
+  return JSON.stringify(packet)
+}
+
+my.GetTrash = function (self, trash = [], trashUsers = []) {
+  const packet = {}
+  packet._head = ToClient.GET_TRASH
+  packet.trash = trash.map(i => ({
+    index: i.index,
+    id: i.id,
+    num: i.num,
+    icon: i.icon,
+    name: i.name,
+    description: i.description,
+    jobs: i.jobs ? (i.jobs.indexOf(self.game.jobs) >= 0 ? false : true) : false,
+    killer: i.killer
+  }))
+  return JSON.stringify(packet)
+}
+
+my.AddTrash = function (self, trash = []) {
+  const packet = {}
+  packet._head = ToClient.ADD_TRASH
+  packet.index = trash.index
+  packet.id = trash.id
+  packet.num = trash.num
+  packet.icon = trash.icon
+  packet.name = trash.name
+  packet.description = trash.description
+  packet.jobs = trash.jobs ? (trash.jobs.indexOf(self.game.jobs) >= 0 ? false : true) : false,
+  packet.killer = trash.killer
+  return JSON.stringify(packet)
+}
+
+my.RemoveTrash = function (index) {
+  const packet = {}
+  packet._head = ToClient.REMOVE_TRASH
+  packet.index = index
+  return JSON.stringify(packet)
+}
+
+my.AddUserTrash = function (user) {
+  const packet = {}
+  packet._head = ToClient.ADD_USER_TRASH
+  packet.index = user.index
+  packet.name = user.name
+  packet.no = (user.hasOwnProperty('game') && user.game.hasOwnProperty('no')) ? user.game.no : 0
+  return JSON.stringify(packet)
+}
+
+my.RemoveUserTrash = function (index) {
+  const packet = {}
+  packet._head = ToClient.REMOVE_USER_TRASH
+  packet.index = index
+  return JSON.stringify(packet)
+}
+
 my.DeadAnimation = function () {
   const packet = {}
   packet._head = ToClient.DEAD_ANIMATION
   return JSON.stringify(packet)
 }
 
-my.ResultGame = function (winner, rank, persons, mission, reward) {
+my.ResultGame = function (ending, rank, persons, mission, reward) {
   const packet = {}
   packet._head = ToClient.RESULT_GAME
-  packet.winner = winner
+  packet.ending = ending
   packet.rank = rank
   packet.persons = persons
   packet.mission = mission
@@ -230,6 +336,14 @@ my.EnterWardrobe = function () {
 my.LeaveWardrobe = function () {
   const packet = {}
   packet._head = ToClient.LEAVE_WARDROBE
+  return JSON.stringify(packet)
+}
+
+my.SwitchFuse = function (obj, active) {
+  const packet = {}
+  packet._head = ToClient.SWITCH_FUSE
+  packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('team')) ? obj.game.team : TeamType.CITIZEN
+  packet.active = active
   return JSON.stringify(packet)
 }
 

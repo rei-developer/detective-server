@@ -3,7 +3,7 @@ module.exports = class Place {
     this.roomId = roomId
     this.users = []
     this.events = []
-    this.akari = true
+    this.light = true
     this.place = place
   }
 

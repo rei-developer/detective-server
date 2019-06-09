@@ -1,176 +1,183 @@
-const { TeamType } = require('./library/const')
+const {
+  TeamType,
+  StatusType,
+  DeathType
+} = require('./library/const')
 const pix = require('./library/pix')
 const Serialize = require('./protocol/Serialize')
+const PlayerState = require('./PlayerState')
 
-class State {
+const dr = [
+  [1, 0], [-1, 0], [0, 1], [0, -1], [1, 0]
+]
+
+class DefaultAction {
   constructor(args = {}) { }
 
-  doAction(context, self) { }
+  doing(self, event) { }
 
-  update(context) { }
+  update(event) { }
 }
 
-class DoorState {
+class DoorAction {
   constructor(args = {}) {
     this.openSound = args['openSound'] || 'door03'
     this.closeSound = args['closeSound'] || 'door04'
-    this.knockSound = args['knockSound'] || 'door06'
-    this.isOpen = false
-    this.isAlive = true
-  }
-
-  doAction(context, self) {
-    const door = context
-    if (this.isAlive) {
-      if (this.isOpen) {
-        if (self.game.team === TeamType.RED) return
-        self.publishToMap(Serialize.PlaySound(this.closeSound))
-        door.move(-1, 0)
-        this.isOpen = false
-      } else {
-        const max = self.game.team === TeamType.RED ? 25 : 0
-        let r = parseInt(Math.random() * max)
-        if (r === 0) {
-          self.publishToMap(Serialize.PlaySound(this.openSound))
-          door.move(1, 0)
-          this.isOpen = true
-          if (self.game.team === TeamType.RED) {
-            r = parseInt(Math.random() * 10)
-            if (r === 0) this.isAlive = false
-          }
-        } else self.publishToMap(Serialize.PlaySound(this.knockSound))
-      }
-    } else self.send(Serialize.InformMessage('<color=red>오니가 철창문을 고장냈다.</color>'))
-  }
-}
-
-class RescueState {
-  constructor(args = {}) {
-    this.count = 0
-  }
-
-  doAction(context, self) {
-    const { mode } = Room.get(context.roomId)
-    if (self.game.team === TeamType.RED || self.game.caught) return
-    if (!mode.caught) return self.send(Serialize.InformMessage('<color=#B5E61D>아직 인질을 구출할 수 없습니다.</color>'))
-    if (mode.score.red < 1) return self.send(Serialize.InformMessage('<color=#B5E61D>붙잡힌 인질이 없습니다.</color>'))
-    let count = 0
-    /*for (const red of mode.redTeam)
-      mode.moveToKickOut(red)
-    for (const blue of mode.blueTeam) {
-      if (blue.game.caught) {
-        blue.teleport(self.place, self.x, self.y)
-        blue.game.caught = false
-        ++count
-      }
-    }
-    mode.score.red = 0*/
-    mode.caught = false
-    self.publish(Serialize.NoticeMessage(self.name + ' 인질 ' + count + '명 구출!'))
-    self.publish(Serialize.PlaySound('Rescue'))
-    self.publish(Serialize.UpdateModeUserCount(0))
-    self.score.rescue += count
-    ++self.score.rescueCombo
-  }
-
-  update(context) {
-    if (++this.count % 10 == 0) {
-      const { mode } = Room.get(context.roomId)
-      /*for (const red of mode.redTeam) {
-        if (red.place === context.place) {
-          const range = Math.abs(red.x - context.x) + Math.abs(red.y - context.y)
-          if (range > 2) continue
-          if (red.game.hp < 0) {
-            mode.moveToBase(red)
-            red.game.hp = 100
-            red.send(Serialize.InformMessage('<color=red>인질구출 스위치에서 벗어나지 않아 강제로 추방되었습니다.</color>'))
-          } else {
-            red.game.hp -= 35
-            red.send(Serialize.InformMessage('<color=red>인질구출 스위치에서 벗어나세요!!!!</color>'))
-            red.send(Serialize.PlaySound('Warn'))
-          }
-        }
-      }*/
-      this.count = 0
-    }
-  }
-}
-
-class TanaState {
-  constructor(args = {}) {
     this.toggle = false
   }
 
-  doAction(context, self) {
-    const tana = context
-    self.publishToMap(Serialize.PlaySound('Sha'))
-    tana.move(this.toggle ? -1 : 1, 0)
+  doing(self, event) {
+    self.publishToMap(Serialize.PlaySound(this.toggle ? this.closeSound : this.openSound))
+    event.move(this.toggle ? -1 : 1, 0)
     this.toggle = !this.toggle
   }
 }
 
-class ObstacleState {
+class HingedDoorAction {
   constructor(args = {}) {
-    this.moveSound = args['moveSound'] || '3'
+    this.toggle = false
   }
 
-  doAction(context, self) {
-    const room = Room.get(context.roomId)
-    if (!room) return
-    self.publishToMap(Serialize.PlaySound(this.moveSound))
-    if (room.isPassable(self.place, context.x + self.direction.x, context.y - self.direction.y, self.direction, true))
-      context.move(self.direction.x, -self.direction.y)
-    else
-      context.move(-self.direction.x, self.direction.y)
+  doing(self, event) {
+    self.publishToMap(Serialize.PlaySound('Sha'))
+    event.move(this.toggle ? -1 : 1, 0)
+    this.toggle = !this.toggle
   }
 }
 
-const PlayerState = require('./PlayerState')
-
-class AkariState {
+class FuseAction {
   constructor(args = {}) {
     this.count = 0
   }
 
-  doAction(context, self) {
-    // if (self.game.team === TeamType.RED) return
+  doing(self, event) {
     const room = Room.get(self.roomId)
-    const light = room.akari(self.place)
+    const fuse = room.mode.fuse = !room.mode.fuse
     const users = room.sameMapUsers(self.place)
     for (const user of users) {
-      if (user.state === PlayerState.Wardrobe) continue
-      user.send(Serialize.PlaySound(light ? 'clap01' : 'clap00'))
-      room.mode.drawAkari(user)
+      if (user.state === PlayerState.Wardrobe)
+        continue
+      if (!room.mode.fuse)
+        user.publish(Serialize.InformMessage('<color=red>퓨즈를 다시 올렸습니다. 불이 다시 켜졌습니다.</color>'))
+      user.publishToMap(Serialize.PlaySound(fuse ? 'clap00' : 'clap01'))
+      room.mode.drawFuse(user)
+    }
+  }
+}
+
+class TrashAction {
+  constructor(args = {}) { }
+
+  doing(self, event) {
+    const room = Room.get(self.roomId)
+    if (room.mode.trashUsers.indexOf(self) >= 0)
+      return
+    room.mode.publishToTrash(Serialize.AddUserTrash(self))
+    room.mode.trashUsers.push(self)
+    self.send(Serialize.GetTrash(self, room.mode.trash, room.mode.trashUsers))
+  }
+}
+
+class LightAction {
+  constructor(args = {}) {
+    this.count = 0
+  }
+
+  doing(self, event) {
+    const room = Room.get(self.roomId)
+    const light = room.light(self.place)
+    const users = room.sameMapUsers(self.place)
+    for (const user of users) {
+      if (user.state === PlayerState.Wardrobe)
+        continue
+      user.publishToMap(Serialize.PlaySound(light ? 'clap01' : 'clap00'))
+      room.mode.drawLight(user)
     }
   }
 
-  update(context) {
+  update(event) {
     if (++this.count % 4 == 0) {
-      const room = Room.get(context.roomId)
-      if (!room) return
-      const red = room.places[context.place].users.find((u) => u.getTeam() === TeamType.RED)
-      if (red) {
-        const light = room.akari(context.place)
-        const users = room.sameMapUsers(context.place)
-        for (const user of users) {
-          if (user.state === PlayerState.Wardrobe) continue
-          room.mode.drawAkari(user)
-        }
+      const room = Room.get(event.roomId)
+      if (!room)
+        return
+      // const killer = room.places[event.place].users.find(u => u.game.team === TeamType.KILLER)
+      // if (killer) {
+      const users = room.sameMapUsers(event.place)
+      for (const user of users) {
+        if (user.state === PlayerState.Wardrobe)
+          continue
+        room.mode.drawLight(user)
       }
+      // }
       this.count = 0
     }
   }
 }
 
-class WardrobeState {
+class WasherAction {
+  constructor(args = {}) { }
+
+  doing(self, event) {
+    if (self.game.washer)
+      return self.send(Serialize.InformMessage('<color=red>이미 이용한 세탁기입니다. 더는 이용할 수 없습니다.</color>'))
+    self.game.washer = true
+    self.publishToMap(Serialize.PlaySound('washer'))
+    const blood = self.game.status.find(s => s === StatusType.BLOOD)
+    if (blood) {
+      const washedBlood = self.game.status.find(s => s === StatusType.WASHED_BLOOD)
+      if (!washedBlood)
+        self.game.status.push(StatusType.WASHED_BLOOD)
+      self.game.status.splice(self.game.status.indexOf(StatusType.BLOOD), 1)
+    }
+    self.send(Serialize.InformMessage('<color=#B5E61D>옷을 세탁하여 혈흔을 지웠습니다. (단, 루미놀 검사는 양성 판정)</color>'))
+    self.send(Serialize.SetGameStatus(self))
+  }
+}
+
+class SinkAction {
+  constructor(args = {}) { }
+
+  doing(self, event) {
+    if (self.game.sink)
+      return self.send(Serialize.InformMessage('<color=red>이미 이용한 개수대입니다. 더는 이용할 수 없습니다.</color>'))
+    self.game.sink = true
+    self.publishToMap(Serialize.PlaySound('sink'))
+    const mud = self.game.status.find(s => s === StatusType.MUD)
+    if (mud)
+      self.game.status.splice(self.game.status.indexOf(StatusType.MUD), 1)
+    self.send(Serialize.InformMessage('<color=#B5E61D>옷과 신발에 묻은 진흙을 깨끗이 씻었습니다.</color>'))
+    self.send(Serialize.SetGameStatus(self))
+  }
+}
+
+class ObstacleAction {
+  constructor(args = {}) {
+    this.moveSound = args['moveSound'] || '3'
+  }
+
+  doing(self, event) {
+    const room = Room.get(event.roomId)
+    if (!room)
+      return
+    self.publishToMap(Serialize.PlaySound(this.moveSound))
+    if (room.isPassable(self.place, event.x + self.direction.x, event.y - self.direction.y, self.direction, true))
+      event.move(self.direction.x, -self.direction.y)
+    else
+      event.move(-self.direction.x, self.direction.y)
+  }
+}
+
+class WardrobeAction {
   constructor(args = {}) {
     this.users = []
   }
 
-  doAction(context, self) {
-    if (self.direction.x !== 0 || self.direction.y !== 1) return
-    const room = Room.get(context.roomId)
-    if (!room) return
+  doing(self, event) {
+    if (self.direction.x !== 0 || self.direction.y !== 1)
+      return
+    const room = Room.get(event.roomId)
+    if (!room)
+      return
     const { mode } = room
     if (self.game.team === TeamType.CITIZEN) {
       if (self.state === PlayerState.Wardrobe) {
@@ -180,7 +187,7 @@ class WardrobeState {
         self.game.wardrobe = null
         self.publishToMap(Serialize.PlaySound('Close1'))
         self.broadcastToMap(Serialize.CreateGameObject(self))
-        mode.drawAkari(self)
+        mode.drawLight(self)
       } else {
         if (this.users.length >= 1) {
           self.send(Serialize.InformMessage('<color=red>장농 안에 누군가 있다.</color>'))
@@ -209,102 +216,65 @@ class WardrobeState {
   }
 }
 
-const dr = [
-  [1, 0], [-1, 0], [0, 1], [0, -1], [1, 0]
-]
-
-class ManiaState {
+class RescueAction {
   constructor(args = {}) {
     this.count = 0
-    this.step = 0
-    this.i = 0
-    this.msgCount = -1
-    this.message = args['message'] // || ['허허... 좀 비켜보시게나.']
-    this.fixed = args['fixed']
   }
 
-  doAction(context, self) {
-    this.msgCount = (++this.msgCount) % this.message.length
-    self.send(Serialize.ChatMessage(context.type, context.index, context.name, this.message[this.msgCount]))
+  doing(self, event) {
+    const { mode } = Room.get(event.roomId)
+    if (self.game.team === TeamType.RED || self.game.caught) return
+    if (!mode.caught) return self.send(Serialize.InformMessage('<color=#B5E61D>아직 인질을 구출할 수 없습니다.</color>'))
+    if (mode.score.red < 1) return self.send(Serialize.InformMessage('<color=#B5E61D>붙잡힌 인질이 없습니다.</color>'))
+    let count = 0
+    /*for (const red of mode.redTeam)
+      mode.moveToKickOut(red)
+    for (const blue of mode.blueTeam) {
+      if (blue.game.caught) {
+        blue.teleport(self.place, self.x, self.y)
+        blue.game.caught = false
+        ++count
+      }
+    }
+    mode.score.red = 0*/
+    mode.caught = false
+    self.publish(Serialize.NoticeMessage(self.name + ' 인질 ' + count + '명 구출!'))
+    self.publish(Serialize.PlaySound('Rescue'))
+    //self.publish(Serialize.UpdateModeUserCount(0))
+    self.score.rescue += count
+    ++self.score.rescueCombo
   }
 
-  update(context) {
-    if (this.fixed) return
-    const room = Room.get(context.roomId)
-    if (!room) return
-    if (this.step <= 0) {
-      this.i = parseInt(Math.random() * 4)
-      this.step = parseInt(Math.random() * 5) + 1
+  update(event) {
+    if (++this.count % 10 == 0) {
+      const { mode } = Room.get(event.roomId)
+      /*for (const red of mode.redTeam) {
+        if (red.place === event.place) {
+          const range = Math.abs(red.x - event.x) + Math.abs(red.y - event.y)
+          if (range > 2) continue
+          if (red.game.hp < 0) {
+            mode.moveToBase(red)
+            red.game.hp = 100
+            red.send(Serialize.InformMessage('<color=red>인질구출 스위치에서 벗어나지 않아 강제로 추방되었습니다.</color>'))
+          } else {
+            red.game.hp -= 35
+            red.send(Serialize.InformMessage('<color=red>인질구출 스위치에서 벗어나세요!!!!</color>'))
+            red.send(Serialize.PlaySound('Warn'))
+          }
+        }
+      }*/
+      this.count = 0
     }
-    context.dirty = true
-    let i = this.i
-    --this.step
-    context.direction.x = dr[i][0]
-    context.direction.y = -dr[i][1]
-    const direction = context.getDirection(dr[i][0], -dr[i][1])
-    if (room.isPassable(context.place, context.x, context.y, direction, false) && room.isPassable(context.place, context.x + dr[i][0], context.y + dr[i][1], 10 - direction, true)) {
-      context.x += dr[i][0]
-      context.y += dr[i][1]
-    }
-    this.count++
-    if (this.count % 500 == 0) {
-      this.msgCount = (++this.msgCount) % this.message.length
-      context.publishToMap(Serialize.ChatMessage(context.type, context.index, context.name, this.message[this.msgCount]))
-    }
-    if (this.count > 1500) this.count = 0
   }
 }
 
-class RabbitState {
-  constructor(args = {}) {
-    this.count = 0
-    this.step = 0
-    this.i = 0
-    this.msgCount = -1
-    this.message = args['message']
-    this.fixed = args['fixed']
-  }
-
-  doAction(context, self) {
-    const room = Room.get(context.roomId)
-    if (!room) return
-
-    self.publish(Serialize.NoticeMessage(self.name + ' 토깽이 사냥!'))
-    self.publish(Serialize.PlaySound('Eat'))
-    context.publishToMap(Serialize.RemoveGameObject(context))
-    room.removeEvent(context)
-  }
-
-  update(context) {
-    if (this.fixed) return
-    const room = Room.get(context.roomId)
-    if (!room) return
-    if (this.step <= 0) {
-      this.i = parseInt(Math.random() * 4)
-      this.step = parseInt(Math.random() * 5) + 1
-    }
-    context.dirty = true
-    let i = this.i
-    --this.step
-    context.direction.x = dr[i][0]
-    context.direction.y = -dr[i][1]
-    const direction = context.getDirection(dr[i][0], -dr[i][1])
-    if (room.isPassable(context.place, context.x, context.y, direction, false) && room.isPassable(context.place, context.x + dr[i][0], context.y + dr[i][1], 10 - direction, true)) {
-      context.x += dr[i][0]
-      context.y += dr[i][1]
-    }
-    this.count++
-    if (this.count > 1500) this.count = 0
-  }
-}
-
-class BoxState {
+class BoxAction {
   constructor(args = {}) {
 
   }
 
-  doAction(context, self) {
-    /*const room = Room.get(context.roomId)
+  doing(self, event) {
+    /*const room = Room.get(event.roomId)
     if (!room) return
     const { mode } = room
     if (self.game.team === TeamType.CITIZEN) {
@@ -323,226 +293,201 @@ class BoxState {
       self.publish(Serialize.UpdateModeUserCount(mode.blueTeam.length))
     }
     self.publish(Serialize.PlaySound('squeaky'))
-    context.publishToMap(Serialize.RemoveGameObject(context))
-    room.removeEvent(context)*/
+    event.publishToMap(Serialize.RemoveGameObject(event))
+    room.removeEvent(event)*/
   }
 }
 
-class EvelevatorState {
+class NpcAction {
   constructor(args = {}) {
-    this.openSound = args['openSound'] || 'eopen'
-    this.closeSound = args['closeSound'] || 'eclose'
-    this.OppenGraphic = args['OppenGraphic'] || 'blank'
-    this.closeGraphic = args['closeGraphic'] || 'ev02'
-    this.inside = args['inside'] || false
-    this.target = null
     this.count = 0
+    this.step = 0
+    this.i = 0
+    this.msgCount = -1
+    this.message = args['message']
+    this.fixed = args['fixed']
   }
 
-  doAction(context, self) {
-    if (!this.inside || !this.target) return
-    self.teleport(this.target.place, this.target.x, this.target.y)
-  }
-
-  changeState(context, open, outdoor) {
-    context.publishToMap(Serialize.RemoveGameObject(context))
-    if (open) {
-      context.publishToMap(Serialize.PlaySound(this.openSound))
-      context.graphics = this.OppenGraphic
-      context.collider = false
-      if (this.inside) this.target = outdoor
+  doing(self, event) {
+    if (event.death > 0 && event.deathCount < 1) {
+      self.send(Serialize.InformMessage(`<color=red>${event.name}${(pix.maker(event.name) ? '가' : '이')} 죽어있습니다.</color>`))
     } else {
-      context.publishToMap(Serialize.PlaySound(this.closeSound))
-      context.graphics = this.closeGraphic
-      context.collider = true
-      this.target = null
+      this.msgCount = (++this.msgCount) % this.message.length
+      self.send(Serialize.ChatMessage(event.type, event.index, `<color=#B5E61D>${event.name}</color>`, this.message[this.msgCount]))
     }
-    context.publishToMap(Serialize.CreateGameObject(context))
   }
 
-  update(context) {
-    if (++this.count % 3 === 0 && this.target) {
-      for (const u of Room.get(context.roomId).places[context.place].users) {
-        if (u.x === context.x && u.y === context.y)
-          u.teleport(this.target.place, this.target.x, this.target.y)
+  update(event) {
+    if (this.fixed)
+      return
+    const room = Room.get(event.roomId)
+    if (!room)
+      return
+    this.count++
+    if (event.death > 0 && event.deathCount < 1) {
+      if (this.count % 10 === 0) {
+        for (const user of room.mode.users) {
+          if (user.place === event.place) {
+            const range = Math.abs(user.x - event.x) + Math.abs(user.y - event.y)
+            if (range >= 5)
+              continue
+            const itemInfo = Item.get(event.death)
+            if (itemInfo.type === DeathType.UNKNOWN || itemInfo.type === DeathType.STRANGULATION || itemInfo.type === DeathType.NECKTIE_STRANGULATION || itemInfo.type === DeathType.POISON)
+              continue
+            const blood = user.game.status.find(s => s === StatusType.BLOOD)
+            if (blood)
+              continue
+            user.send(Serialize.PlaySound('Steps'))
+            user.game.status.push(StatusType.BLOOD)
+            user.send(Serialize.SetGameStatus(user))
+          }
+        }
+      }
+    } else {
+      if (event.deathCount > 0)
+        --event.deathCount
+      if (event.deathCount === 1) {
+        ++room.mode.corpses
+        room.mode.deadCount = 60
+        event.publish(Serialize.UpdateRoomModeInfo(room.mode))
+        event.graphics = `${event.graphics}_D`
+        event.publishToMap(Serialize.SetGraphics(event))
+        event.publish(Serialize.PlaySound(event.deathSound))
+      }
+      if (this.count % 100 === 0) {
+        if (this.step <= 0) {
+          this.i = parseInt(Math.random() * 4)
+          this.step = parseInt(Math.random() * 5) + 1
+        }
+        event.dirty = true
+        let i = this.i
+        --this.step
+        event.direction.x = dr[i][0]
+        event.direction.y = -dr[i][1]
+        const direction = event.getDirection(dr[i][0], -dr[i][1])
+        if (room.isPassable(event.place, event.x, event.y, direction, false) && room.isPassable(event.place, event.x + dr[i][0], event.y + dr[i][1], 10 - direction, true)) {
+          event.x += dr[i][0]
+          event.y += dr[i][1]
+        }
+      }
+      if (this.count % 200 == 0) {
+        this.msgCount = (++this.msgCount) % this.message.length
+        event.publishToMap(Serialize.ChatMessage(event.type, event.index, `<color=#B5E61D>${event.name}</color>`, this.message[this.msgCount]))
       }
     }
+    if (this.count > 1500)
+      this.count = 0
   }
 }
 
-class EvelevatorInsideState {
+class ManiaAction {
   constructor(args = {}) {
-    this.state = 0 // 0 is Open 1  is closing 2 is moving 3 is waiting
-    this.passive = true
-    this.inDoor = null
-    this.outDoors = {}
-    this.outerIds = args['outerId']
-    this.innerId = args['elevId']
-    this.moveSound = args['moveSound'] || 'einside'
-    this.floorMax = Object.keys(this.outerIds).length
-    this.floor = '0'
-  }
-
-  doAction(context, self) {
-    if (this.state === 0) {
-      this.passive = false
-      let r = parseInt(Math.random() * (this.floorMax))
-      let keys = Object.keys(this.outerIds)
-      if (keys[r] === this.floor)
-        r = (r + 1) % this.floorMax
-      this.pushButton(context, keys[r])
-    } else if (this.state === 1) {
-      self.send(Serialize.InformMessage('<color=#B5E61D>엘레베이터가 문이 닫히는 중이다.</color>'))
-    } else if (this.state === 2) {
-      self.send(Serialize.InformMessage('<color=#B5E61D>엘레베이터가 ' + this.floor + '층으로 가는 중이다.</color>'))
-    } else {
-      self.send(Serialize.InformMessage('<color=#B5E61D>엘레베이터가 도착중이다.</color>'))
-    }
-  }
-
-  pushButton(context, target) {
-    if (!Room.get(context.roomId) || this.state != 0) return
-    context.publishToMap(Serialize.InformMessage('<color=#B5E61D>' + target + '층이 눌렸습니다. 엘레베이터 문이 닫힙니다.</color>'))
-
-    this.state = 1
-    let outDoor
-
-    for (const keys in this.outerIds) {
-      if (!this.outDoors[keys])
-        this.outDoors[keys] = Room.get(context.roomId).places[this.outerIds[keys]].events.find((e) => e.state instanceof EvelevatorState)
-      if (keys === this.floor) {
-        outDoor = this.outDoors[keys]
-        outDoor.publishToMap(Serialize.InformMessage('<color=#B5E61D>엘레베이터 문이 닫힙니다.</color>'))
-      }
-    }
-    this.floor = target
-    setTimeout(() => {
-      this.closeDoor(context, outDoor)
-    }, 1200)
-  }
-
-  closeDoor(context, outDoor) {
-    if (!Room.get(context.roomId) || this.state != 1) return
-
-    this.state = 2
-
-    if (outDoor)
-      outDoor.state.changeState(outDoor, false)
-    if (!this.inDoor)
-      this.inDoor = Room.get(context.roomId).places[this.innerId].events.find((e) => e.state instanceof EvelevatorState)
-
-    this.inDoor.state.changeState(this.inDoor, false)
-    context.publishToMap(Serialize.PlaySound(this.moveSound))
-
-    setTimeout(() => {
-      this.openDoor(context)
-    }, 8000)
-  }
-
-  openDoor(context) {
-    if (!Room.get(context.roomId) || this.state != 2) return
-
-    this.state = 3
-    let outDoor = this.outDoors[this.floor]
-
-    outDoor.state.changeState(outDoor, true)
-    this.inDoor.state.changeState(this.inDoor, true, outDoor)
-
-    outDoor.publishToMap(Serialize.InformMessage('<color=#B5E61D>엘레베이터 문이 열립니다.</color>'))
-    context.publishToMap(Serialize.InformMessage('<color=#B5E61D>' + this.floor + '층 엘레베이터 문이 열립니다.</color>'))
-
-    this.passive = true
     this.count = 0
+    this.step = 0
+    this.i = 0
+    this.msgCount = -1
+    this.message = args['message'] // || ['허허... 좀 비켜보시게나.']
+    this.fixed = args['fixed']
+  }
 
-    setTimeout(() => this.state = 0, 1200)
+  doing(self, event) {
+    this.msgCount = (++this.msgCount) % this.message.length
+    self.send(Serialize.ChatMessage(event.type, event.index, event.name, this.message[this.msgCount]))
+  }
+
+  update(event) {
+    if (this.fixed)
+      return
+    const room = Room.get(event.roomId)
+    if (!room)
+      return
+    if (this.step <= 0) {
+      this.i = parseInt(Math.random() * 4)
+      this.step = parseInt(Math.random() * 5) + 1
+    }
+    event.dirty = true
+    let i = this.i
+    --this.step
+    event.direction.x = dr[i][0]
+    event.direction.y = -dr[i][1]
+    const direction = event.getDirection(dr[i][0], -dr[i][1])
+    if (room.isPassable(event.place, event.x, event.y, direction, false) && room.isPassable(event.place, event.x + dr[i][0], event.y + dr[i][1], 10 - direction, true)) {
+      event.x += dr[i][0]
+      event.y += dr[i][1]
+    }
+    this.count++
+    if (this.count % 500 == 0) {
+      this.msgCount = (++this.msgCount) % this.message.length
+      event.publishToMap(Serialize.ChatMessage(event.type, event.index, event.name, this.message[this.msgCount]))
+    }
+    if (this.count > 1500)
+      this.count = 0
   }
 }
 
-class EvelevatorOutsideState {
+class RabbitAction {
   constructor(args = {}) {
-    this.elevatorId = args['elevId']
-    this.floor = args['floor']
-    this.elevatorEvent = null
+    this.count = 0
+    this.step = 0
+    this.i = 0
+    this.msgCount = -1
+    this.message = args['message']
+    this.fixed = args['fixed']
   }
 
-  doAction(context, self) {
-    if (!this.elevatorEvent)
-      this.elevatorEvent = Room.get(context.roomId).places[this.elevatorId].events.find((e) => e.state instanceof EvelevatorInsideState)
+  doing(self, event) {
+    const room = Room.get(event.roomId)
+    if (!room)
+      return
+    self.publish(Serialize.NoticeMessage(self.name + ' 토깽이 사냥!'))
+    self.publish(Serialize.PlaySound('Eat'))
+    event.publishToMap(Serialize.RemoveGameObject(event))
+    room.removeEvent(event)
+  }
 
-    const inside = this.elevatorEvent.state
-    if (inside.state === 0) {
-      if (inside.floor != this.floor)
-        inside.pushButton(this.elevatorEvent, this.floor)
-    } else if (inside.state === 1) {
-      self.send(Serialize.InformMessage('<color=#B5E61D>엘레베이터가 문이 닫히는 중이다.</color>'))
-    } else if (inside.state === 2) {
-      self.send(Serialize.InformMessage('<color=#B5E61D>엘레베이터가 ' + inside.floor + '층으로 가는 중이다.</color>'))
-    } else if (inside.floor != this.floor) {
-      self.send(Serialize.InformMessage('<color=#B5E61D>엘레베이터가 ' + inside.floor + '층에 도착중이다.</color>'))
+  update(event) {
+    if (this.fixed)
+      return
+    const room = Room.get(event.roomId)
+    if (!room)
+      return
+    if (this.step <= 0) {
+      this.i = parseInt(Math.random() * 4)
+      this.step = parseInt(Math.random() * 5) + 1
     }
-
-  }
-}
-
-class PowerDoorState {
-  constructor(args = {}) {
-    this.openSound = args['openSound'] || 'door03'
-    this.closeSound = args['closeSound'] || 'door04'
-    this.knockSound = args['knockSound'] || 'door06'
-    this.isOpen = true
-    this.hp = 0
-  }
-
-  doAction(context, self) {
-    const door = context
-    if (this.isOpen) {
-      if (self.game.team === TeamType.RED) return
-      const r = parseInt(Math.random() * 50)
-      if (r === 0) {
-        self.publishToMap(Serialize.PlaySound(this.closeSound))
-        door.move(-1, 0)
-        this.isOpen = false
-        this.hp *= 5
-      } else {
-        self.publishToMap(Serialize.PlaySound(this.knockSound))
-        this.hp++
-      }
-    } else {
-      if (self.game.team === TeamType.RED && this.hp > 0) {
-        self.publishToMap(Serialize.PlaySound(this.knockSound))
-        this.hp--
-        return
-      }
-      const max = (self.game.team === TeamType.RED ? 100 : 50)
-      const r = parseInt(Math.random() * max)
-      if (r === 0) {
-        self.publishToMap(Serialize.PlaySound(this.openSound))
-        door.move(1, 0)
-        this.isOpen = true
-        this.hp = 0
-      } else {
-        self.publishToMap(Serialize.PlaySound(this.knockSound))
-      }
+    event.dirty = true
+    let i = this.i
+    --this.step
+    event.direction.x = dr[i][0]
+    event.direction.y = -dr[i][1]
+    const direction = event.getDirection(dr[i][0], -dr[i][1])
+    if (room.isPassable(event.place, event.x, event.y, direction, false) && room.isPassable(event.place, event.x + dr[i][0], event.y + dr[i][1], 10 - direction, true)) {
+      event.x += dr[i][0]
+      event.y += dr[i][1]
     }
+    this.count++
+    if (this.count > 1500)
+      this.count = 0
   }
 }
 
 module.exports = new Proxy({
-  door: DoorState,
-  tana: TanaState,
-  obstacle: ObstacleState,
-  akari: AkariState,
-  wardrobe: WardrobeState,
-  rescue: RescueState,
-  mania: ManiaState,
-  rabbit: RabbitState,
-  box: BoxState,
-  elevator: EvelevatorState,
-  elevin: EvelevatorInsideState,
-  elevout: EvelevatorOutsideState,
-  powerDoor: PowerDoorState
+  door: DoorAction,
+  hingedDoor: HingedDoorAction,
+  fuse: FuseAction,
+  trash: TrashAction,
+  light: LightAction,
+  washer: WasherAction,
+  sink: SinkAction,
+  obstacle: ObstacleAction,
+  wardrobe: WardrobeAction,
+  rescue: RescueAction,
+  box: BoxAction,
+  npc: NpcAction,
+  mania: ManiaAction,
+  rabbit: RabbitAction
 }, {
-  get: function (target, name) {
-    return target.hasOwnProperty(name) ? target[name] : State
-  }
-})
+    get: function (target, name) {
+      return target.hasOwnProperty(name) ? target[name] : DefaultAction
+    }
+  })

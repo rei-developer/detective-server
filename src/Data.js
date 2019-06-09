@@ -16,8 +16,9 @@ module.exports = (function () {
   return class Data {
     static async loadData() {
       await Data.loadMaps()
-      await Data.loadRanks()
+      await Data.loadItems()
       await Data.loadClans()
+      await Data.loadRanks()
     }
 
     static async loadMaps() {
@@ -27,6 +28,17 @@ module.exports = (function () {
         GameMap.add(map)
       }
       console.log('맵 로딩 완료.')
+    }
+
+    static async loadItems() {
+      console.log('아이템 로딩중...')
+      const items = require(`../Assets/Items.json`)['items']
+      for (let i = 0; i < items.length; ++i) {
+        const itemData = items[i]
+        const item = new Item(itemData.id, itemData.type, itemData.num, itemData.maxNum, itemData.icon, itemData.name, itemData.description, itemData.jobs, itemData.killer, itemData.use, itemData.method)
+        Item.items[i + 1] = item
+      }
+      console.log('아이템 로딩 완료.')
     }
 
     static async loadClans() {

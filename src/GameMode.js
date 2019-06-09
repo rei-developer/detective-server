@@ -9,11 +9,11 @@ const Event = require('./Event')
 module.exports = class GameMode {
   constructor(roomId) {
     this.roomId = roomId
+    this.type = ModeType.PLAYGROUND
     this.map = MapType.ISLAND
     this.count = 0
-    this.type = 0
     this.room = Room.get(this.roomId)
-    const objects = require('../Assets/Mods/Eve000.json')[3]
+    /* const objects = require(`../Assets/Events/${this.type}.json`)[3]
     for (const object of objects) {
       const range = 3
       for (let i = 0; i < 10; i++) {
@@ -26,7 +26,7 @@ module.exports = class GameMode {
         this.room.addEvent(event)
         this.room.publishToMap(event.place, Serialize.CreateGameObject(event))
       }
-    }
+    } */
   }
 
   moveToBase(self) {
@@ -48,21 +48,28 @@ module.exports = class GameMode {
     self.setGraphics(self.graphics)
   }
 
-  drawAkari(self) {
-    self.send(Serialize.SwitchLight(this.room.places[self.place].akari))
+  drawFuse(self) {
+    const room = Room.get(self.roomId)
+    if (!room || !room.mode.fuse)
+      return
+    self.send(Serialize.SwitchFuse(self, room.mode.fuse))
+  }
+
+  drawLight(self) {
+    self.send(Serialize.SwitchLight(this.room.places[self.place].light))
   }
 
   drawEvents(self) {
     const { events } = this.room.places[self.place]
-    for (const event of events) {
+    for (const event of events)
       self.send(Serialize.CreateGameObject(event))
-    }
   }
 
   drawUsers(self) {
     const sameMapUsers = this.room.sameMapUsers(self.place)
     for (const user of sameMapUsers) {
-      if (self === user) continue
+      if (self === user)
+        continue
       user.send(Serialize.CreateGameObject(self))
       self.send(Serialize.CreateGameObject(user))
     }
@@ -72,8 +79,8 @@ module.exports = class GameMode {
     return true
   }
 
-  doAction(self, event) {
-    event.doAction(self)
+  doing(self, event) {
+    event.doing(self)
     return true
   }
 
@@ -87,9 +94,8 @@ module.exports = class GameMode {
       }
       return
     } else {
-      if (this.count % 100 === 0) {
+      if (this.count % 100 === 0)
         this.room.publish(Serialize.NoticeMessage('4명 이상이어야 합니다. (' + this.room.users.length + '/' + this.room.max + '명)'))
-      }
     }
     if (++this.count === 10000) this.count = 0
   }

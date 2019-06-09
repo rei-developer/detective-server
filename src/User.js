@@ -97,11 +97,11 @@ global.User = (function () {
     }
 
     static getByUser(user) {
-      return User.users.find((u) => u === user)
+      return User.users.find(u => u === user)
     }
 
     static async create(socket, verify) {
-      if (User.users.some((u) => u.verify.id === verify.id && u.verify.loginType === verify.loginType)) return
+      if (User.users.some(u => u.verify.id === verify.id && u.verify.loginType === verify.loginType)) return
       if (verify === 'test') {
         const user = await new User(socket, verify, 1)
         User.add(user)
@@ -449,6 +449,26 @@ global.User = (function () {
     hit() {
       if (!this.roomId) return
       Room.get(this.roomId).hit(this)
+    }
+
+    useItem(index) {
+      if (!this.roomId) return
+      Room.get(this.roomId).useItem(this, index)
+    }
+
+    dropItem(index) {
+      if (!this.roomId) return
+      Room.get(this.roomId).dropItem(this, index)
+    }
+
+    pickUpTrash(index) {
+      if (!this.roomId) return
+      Room.get(this.roomId).pickUpTrash(this, index)
+    }
+
+    leaveTrash() {
+      if (!this.roomId) return
+      Room.get(this.roomId).leaveTrash(this)
     }
 
     portal(place, x, y, dx = 0, dy = 0) {

@@ -100,9 +100,7 @@ module.exports = class Server {
       user.send(Serialize.ConnectionCount(User.users.length))
     }
 
-    handler[ToServer.CHAT] = async data => {
-      user.chat(utf8.decode(data))
-    }
+    handler[ToServer.CHAT] = async data => user.chat(utf8.decode(data))
 
     handler[ToServer.INPUT_ARROW] = async data => {
       const view = new DataView(data.buffer)
@@ -117,32 +115,19 @@ module.exports = class Server {
         user.move(x, y, timestamp)
     }
 
-    handler[ToServer.INPUT_HIT] = async () => {
-      user.hit()
-    }
+    handler[ToServer.INPUT_HIT] = async () => user.hit()
 
-    handler[ToServer.ENTER_ROOM] = async data => {
-      user.entry(data[0])
-    }
+    handler[ToServer.ENTER_ROOM] = async data => user.entry(data[0])
 
-    handler[ToServer.REWARD] = async data => {
-      user.result(data[0])
-    }
+    handler[ToServer.REWARD] = async data => user.result(data[0])
 
-    handler[ToServer.ESCAPE] = async () => {
-      user.leave()
-    }
+    handler[ToServer.ESCAPE] = async () => user.leave()
 
-    handler[ToServer.CREATE_CLAN] = async data => {
-      user.createClan(utf8.decode(data))
-    }
+    handler[ToServer.CREATE_CLAN] = async data => user.createClan(utf8.decode(data))
 
-    handler[ToServer.GET_CLAN] = async () => {
-      user.getClan()
-    }
-    handler[ToServer.LEAVE_CLAN] = async () => {
-      user.leaveClan()
-    }
+    handler[ToServer.GET_CLAN] = async () => user.getClan()
+
+    handler[ToServer.LEAVE_CLAN] = async () => user.leaveClan()
 
     handler[ToServer.JOIN_CLAN] = async data => {
       const int32 = new Int32Array(data.buffer)
@@ -163,13 +148,26 @@ module.exports = class Server {
       user.kickClan(int32[0])
     }
 
-    handler[ToServer.TEMP_SKIN_BUY] = async () => {
-      user.tempSkinBuy()
+    handler[ToServer.USE_ITEM] = async data => {
+      const int32 = new Int32Array(data.buffer)
+      user.useItem(int32[0])
     }
 
-    handler[ToServer.LOGGER] = async data => {
-      console.log(utf8.decode(data))
+    handler[ToServer.DROP_ITEM] = async data => {
+      const int32 = new Int32Array(data.buffer)
+      user.dropItem(int32[0])
     }
+
+    handler[ToServer.PICK_UP_TRASH] = async data => {
+      const int32 = new Int32Array(data.buffer)
+      user.pickUpTrash(int32[0])
+    }
+
+    handler[ToServer.LEAVE_TRASH] = async () => user.leaveTrash()
+
+    handler[ToServer.TEMP_SKIN_BUY] = async () => user.tempSkinBuy()
+
+    handler[ToServer.LOGGER] = async data => console.log(utf8.decode(data))
 
     return handler
   }

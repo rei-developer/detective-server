@@ -1,23 +1,20 @@
+const { ModeType } = require('../library/const')
 const Serialize = require('../protocol/Serialize')
 const Event = require('../Event')
 
 module.exports = class PlayGroundMode {
   constructor(roomId) {
     this.roomId = roomId
+    this.type = ModeType.PLAYGROUND
     this.count = 20
     this.maxCount = this.count
     this.tick = 0
-    this.type = 3
     this.room = Room.get(this.roomId)
-    const objects = require('../../Assets/Mods/Mod' + ('' + 0).padStart(3, '0') + '.json')[1]
+    const objects = require(`../../Assets/Modes/${this.type}.json`)[1]
     for (const object of objects) {
       const event = new Event(this.roomId, object)
       this.room.addEvent(event)
     }
-  }
-
-  moveToPlaza(self) {
-    self.teleport(79, 30, 62)
   }
 
   join(self) {
@@ -31,8 +28,14 @@ module.exports = class PlayGroundMode {
     self.setGraphics(self.graphics)
   }
 
-  drawAkari(self) {
-    self.send(Serialize.SwitchLight(this.room.places[self.place].akari))
+  moveToPlaza(self) {
+    self.teleport(79, 30, 62)
+  }
+
+  drawFuse(self) { }
+
+  drawLight(self) {
+    self.send(Serialize.SwitchLight(this.room.places[self.place].light))
   }
 
   drawEvents(self) {
@@ -55,10 +58,18 @@ module.exports = class PlayGroundMode {
     return true
   }
 
-  doAction(self, target) {
-    target.doAction(self)
+  doing(self, target) {
+    target.doing(self)
     return true
   }
+
+  useItem(self, index) { }
+
+  dropItem(self, index) { }
+
+  pickUpTrash(self, index) { }
+
+  leaveTrash(self) { }
 
   spawnRabbit() {
     const range = 6

@@ -1,0 +1,379 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "type": 0,
+      "num": 4,
+      "maxNum": 4,
+      "icon": "luminor",
+      "name": "루미놀 검사 지시약",
+      "description": "플레이어의 몸을 수색하여 혈흔 또는 씻어낸 흔적이 있는지 검사하는 도구.",
+      "jobs": [
+        0
+      ],
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "luminor",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 2,
+      "type": 0,
+      "num": 5,
+      "maxNum": 5,
+      "icon": "gloves",
+      "name": "극세사 장갑",
+      "description": "플레이어의 몸을 수색하여 혈흔, 진흙, 먼지 등이 묻었는지 검사하는 도구.",
+      "jobs": false,
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "gloves",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 3,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "warrant",
+      "name": "수색영장",
+      "description": "플레이어가 소유한 도구들을 5초 동안 확인할 수 있는 도구.",
+      "jobs": [
+        1,
+        4,
+        6,
+        7
+      ],
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "warrant",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 4,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "authorization",
+      "name": "부검 허가증",
+      "description": "살해당한 시신의 상태가 어떤지 살펴볼 수 있는 도구.",
+      "jobs": [
+        0,
+        1,
+        3
+      ],
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "authorization",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 5,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "magnifying",
+      "name": "돋보기",
+      "description": "살해당한 시신의 주변이 어떤 상황인지 살펴볼 수 있는 도구.",
+      "jobs": [
+        1,
+        2
+      ],
+      "killer": false,
+      "use": false,
+      "method": {
+        "command": "magnifying",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 6,
+      "type": 0,
+      "num": 4,
+      "maxNum": 4,
+      "icon": "poison",
+      "name": "독극물 판별기",
+      "description": "독극물에 의해 살해당했을 때 어떤 독극물이 쓰였는지 검출할 수 있는 도구.",
+      "jobs": [
+        0
+      ],
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "poison",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 7,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "gps",
+      "name": "위치추적 장치",
+      "description": "모든 플레이어의 위치를 확인할 수 있는 도구.",
+      "jobs": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "killer": false,
+      "use": false,
+      "method": {
+        "command": "gps",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 8,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "plasticBag",
+      "name": "증거인멸 봉투",
+      "description": "살해 현장의 모든 증거를 흔적도 없이 지워버릴 수 있는 도구.",
+      "jobs": false,
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "plasticBag",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 9,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "silencer",
+      "name": "소음기",
+      "description": "총기 사용시 소음을 억제해줄 수 있는 일회용 소음기. (개발중)",
+      "jobs": false,
+      "killer": true,
+      "use": true,
+      "method": {
+        "command": "silencer",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 10,
+      "type": 7,
+      "num": 2,
+      "maxNum": 2,
+      "icon": "poison1",
+      "name": "청산가리",
+      "description": "청산가리로 흔히 불리는 물질이다. 예전 명칭인 시안화칼륨으로도 곧잘 불린다. 약 25초 소요.",
+      "jobs": false,
+      "killer": true,
+      "use": true,
+      "method": {
+        "command": "usePoison",
+        "arguments": {
+          "timer": 25
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": 7,
+      "num": 2,
+      "maxNum": 2,
+      "icon": "poison2",
+      "name": "스트리크닌",
+      "description": "마전의 씨에 함유되어 있는 알칼로이드. 중추 신경 마비, 근육 강직, 경련 따위를 일으킨다. 약 20초 소요.",
+      "jobs": false,
+      "killer": true,
+      "use": true,
+      "method": {
+        "command": "usePoison",
+        "arguments": {
+          "timer": 20
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": 7,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "poison3",
+      "name": "테트로도톡신",
+      "description": "복어알 따위에 들어 있는 독소. 무색의 고체로, 말초 신경과 중추 신경에 작용하여 신경을 마비시켜 죽게 한다. 약 5초 소요.",
+      "jobs": false,
+      "killer": true,
+      "use": true,
+      "method": {
+        "command": "usePoison",
+        "arguments": {
+          "timer": 5
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": 1,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "손으로 목 조르기",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": false,
+      "method": {
+        "command": "weapon",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 14,
+      "type": 1,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "밧줄",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": true,
+      "method": {
+        "command": "weapon",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 15,
+      "type": 2,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "넥타이",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": true,
+      "method": {
+        "command": "weapon",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 16,
+      "type": 3,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "망치",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": false,
+      "method": {
+        "command": "weapon",
+        "arguments": {
+          "weaponSound": "punch3"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "type": 3,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "파이프",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": false,
+      "method": {
+        "command": "weapon",
+        "arguments": {
+          "weaponSound": "punch4"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "type": 3,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "나무 방망이",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": false,
+      "method": {
+        "command": "weapon",
+        "arguments": {
+          "weaponSound": "punch1"
+        }
+      }
+    },
+    {
+      "id": 19,
+      "type": 4,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "식칼",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": false,
+      "method": {
+        "command": "weapon",
+        "arguments": {
+          "weaponSound": "knife"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": 4,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "단도",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": false,
+      "method": {
+        "command": "weapon",
+        "arguments": {
+          "weaponSound": "knife"
+        }
+      }
+    },
+    {
+      "id": 21,
+      "type": 4,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "",
+      "name": "일본도",
+      "description": "",
+      "jobs": false,
+      "killer": true,
+      "use": false,
+      "method": {
+        "command": "weapon",
+        "arguments": {
+          "weaponSound": "samurai"
+        }
+      }
+    }
+  ]
+}
