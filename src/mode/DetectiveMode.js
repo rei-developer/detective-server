@@ -1,5 +1,6 @@
 const {
   TeamType,
+  JobsType,
   ModeType,
   MapType,
   EndingType
@@ -54,16 +55,19 @@ module.exports = class DetectiveMode {
     return {
       no: 0,
       team: TeamType.CITIZEN,
+      jobs: JobsType.DOCTOR,
       status: [],
       inventory: [],
       nextItemIndex: 0,
       hp: 100,
       count: 0,
+      fuse: 0,
       pointed: 0,
       vote: null,
       wardrobe: null,
       washer: false,
       sink: false,
+      likes: true,
       result: false
     }
   }
@@ -262,6 +266,8 @@ module.exports = class DetectiveMode {
   }
 
   selectVote(self, index) {
+    if (self.game.vote)
+      return
     const findIndex = this.users.findIndex(user => user.index === index)
     if (findIndex < 0)
       return
@@ -335,19 +341,17 @@ module.exports = class DetectiveMode {
       user.game.result = true
     }
     const ranks = slice.sort((a, b) => b.score.sum - a.score.sum)
-    const persons = slice.length
     for (const user of this.users) {
-      const mission = `살해 ${user.score.kill}`
       let exp = 100 + user.score.sum
       let coin = 50 + parseInt(user.score.sum / 2)
-      if (exp < 100) exp = 100
-      if (coin < 50) coin = 50
-      const rank = ranks.indexOf(user) + 1
-      const reward = `${coin} COIN\n${exp} RP`
+      if (exp < 100)
+        exp = 100
+      if (coin < 50)
+        coin = 50
       user.reward.exp = exp
       user.reward.coin = coin
-      user.send(Serialize.ResultGame(ending, rank, persons, mission, reward))
     }
+    this.room.publish(Serialize.ResultGame(ending, ranks))
     Room.remove(this.room)
   }
 
@@ -374,7 +378,7 @@ module.exports = class DetectiveMode {
               }
               killer.send(Serialize.SetGameTeam(killer))
             }
-            const jobs = [...Array(8)].map((_, i) => i).sort(() => Math.random() - Math.random())
+            const jobs = [...Array(JobsType.ARBEIT)].map((_, i) => i).sort(() => Math.random() - Math.random())
             this.users.map((user, index) => {
               user.game.jobs = jobs[index]
               user.send(Serialize.SetGameJobs(user))
@@ -389,14 +393,12 @@ module.exports = class DetectiveMode {
         case STATE_GAME:
           if (this.deadCount > 0)
             --this.deadCount
-          if (this.corpses < 1 && this.count % 60 === 0)
-            this.publishToKiller(Serialize.NoticeMessage(`${this.count}초 안에 첫살인을 마쳐야 합니다!!`))
+          if (this.corpses < 3 && this.count % 60 === 0)
+            this.publishToKiller(Serialize.NoticeMessage(`${this.count}초 안에 3명을 살인해야 합니다!!`))
           if (this.corpses >= 5 || this.users.length < 4)
             this.result(EndingType.KILLER)
-          if (this.count === 5)
-            this.room.publish(Serialize.PlaySound('Second'))
           else if (this.count === 0) {
-            if (this.corpses < 1)
+            if (this.corpses < 3)
               this.result(EndingType.DRAW)
           }
           break
@@ -405,6 +407,8 @@ module.exports = class DetectiveMode {
             this.deadCount = 30
             this.room.publish(Serialize.UpdateRoomModeInfo(this))
             this.room.publish(Serialize.GetVote(this.users))
+          } else if (this.count === 20) {
+            this.room.publish(Serialize.PlaySound('Second'))
           } else if (this.count === 15) {
             this.room.publish(Serialize.CloseVote())
             this.room.publish(Serialize.NoticeMessage('모든 사람들의 투표가 끝났습니다. 가장 많이 지목을 받은 사람은...'))

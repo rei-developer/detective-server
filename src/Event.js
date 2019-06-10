@@ -38,6 +38,7 @@ module.exports = class Event extends Character {
     this.death = false
     this.deathCount = 0
     this.deathSound = deathSound
+    this.target = null
     this.action = new Actions[action.command](action.arguments)
   }
 

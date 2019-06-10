@@ -170,6 +170,11 @@ module.exports = class Server {
       user.selectVote(int32[0])
     }
 
+    handler[ToServer.SET_UP_USER_LIKES] = async data => {
+      const int32 = new Int32Array(data.buffer)
+      user.setUpUserLikes(int32[0])
+    }
+
     handler[ToServer.TEMP_SKIN_BUY] = async () => user.tempSkinBuy()
 
     handler[ToServer.LOGGER] = async data => console.log(utf8.decode(data))

@@ -56,19 +56,20 @@ class VoteAction {
       return
     if (room.mode.corpses < 3)
       return self.send(Serialize.InformMessage('<color=red>3번째 살인 이후부터 투표가 가능합니다.</color>'))
+    const users = Math.floor(room.mode.users.length / 2)
     const persons = room.places[self.place].users.length
-    if (persons < 3)
-      return self.send(Serialize.InformMessage('<color=red>이곳에 3명 이상이 모여야 투표가 가능합니다.</color>'))
+    if (persons < users)
+      return self.send(Serialize.InformMessage(`<color=red>이곳에 ${users}명 이상이 모여야 투표가 가능합니다.</color>`))
     room.mode.vote(self.name)
   }
 }
 
 class FuseAction {
-  constructor(args = {}) {
-    this.count = 0
-  }
+  constructor(args = {}) { }
 
   doing(self, event) {
+    if (++self.game.fuse > 10)
+      return self.send(Serialize.InformMessage('<color=red>당신은 이제 퓨즈를 사용할 수 없습니다.</color>'))
     const room = Room.get(self.roomId)
     const fuse = room.mode.fuse = !room.mode.fuse
     for (const user of room.mode.users) {
@@ -78,6 +79,28 @@ class FuseAction {
         user.publish(Serialize.InformMessage('<color=red>퓨즈를 다시 올렸습니다. 불이 다시 켜졌습니다.</color>'))
       user.publishToMap(Serialize.PlaySound(fuse ? 'clap00' : 'clap01'))
       room.mode.drawFuse(user)
+    }
+  }
+
+  update(event) {
+    if (this.fixed)
+      return
+    const room = Room.get(event.roomId)
+    if (!room)
+      return
+    if (room.mode.state !== 1)
+      return
+    if (event.deathCount > 0)
+      --event.deathCount
+    if (event.deathCount === 1) {
+      ++room.mode.corpses
+      const fuse = room.mode.fuse = false
+      for (const user of room.mode.users) {
+        if (user.state === PlayerState.Wardrobe)
+          continue
+        user.publishToMap(Serialize.PlaySound('clap01'))
+        room.mode.drawFuse(user)
+      }
     }
   }
 }
@@ -322,6 +345,8 @@ class NpcAction {
     const room = Room.get(event.roomId)
     if (!room)
       return
+    if (room.mode.state !== 1)
+      return
     this.count++
     if (event.death > 0 && event.deathCount < 1) {
       if (this.count % 10 === 0) {
@@ -347,9 +372,10 @@ class NpcAction {
         --event.deathCount
       if (event.deathCount === 1) {
         ++room.mode.corpses
-        room.mode.deadCount = 30
+        room.mode.deadCount = 40
+        if (event.target)
+          event.target.send(Serialize.InformMessage(`강령술에 의해 ${event.name} 사망을 확인함.`))
         event.publish(Serialize.UpdateRoomModeInfo(room.mode))
-        event.collider = false
         event.graphics = `${event.graphics}_D`
         event.publishToMap(Serialize.SetGraphics(event))
         event.publish(Serialize.PlaySound(event.deathSound))

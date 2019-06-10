@@ -116,7 +116,7 @@
       "x": 10,
       "y": 6,
       "graphics": "PYH",
-      "collider": true,
+      "collider": false,
       "detective": true,
       "deathSound": "scream3",
       "action": {
@@ -137,9 +137,9 @@
       "x": 8,
       "y": 7,
       "graphics": "PYH",
-      "collider": true,
+      "collider": false,
       "detective": true,
-      "deathSound": "scream4",
+      "deathSound": "scream1",
       "action": {
         "command": "npc",
         "arguments": {
@@ -160,9 +160,9 @@
       "x": 10,
       "y": 8,
       "graphics": "PYH",
-      "collider": true,
+      "collider": false,
       "detective": true,
-      "deathSound": "scream1",
+      "deathSound": "scream2",
       "action": {
         "command": "npc",
         "arguments": {
@@ -179,7 +179,7 @@
       "x": 8,
       "y": 10,
       "graphics": "PYH",
-      "collider": true,
+      "collider": false,
       "detective": true,
       "deathSound": "scream3",
       "action": {
@@ -198,14 +198,147 @@
       "x": 9,
       "y": 6,
       "graphics": "PYH",
-      "collider": true,
+      "collider": false,
       "detective": true,
-      "deathSound": "scream2",
+      "deathSound": "scream4",
       "action": {
         "command": "npc",
         "arguments": {
           "message": [
             "어케함"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "박종한",
+      "place": 193,
+      "x": 8,
+      "y": 6,
+      "graphics": "PYH",
+      "collider": false,
+      "detective": true,
+      "deathSound": "scream5",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "오늘 여자 만났다 ㅋㅋㅋ"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "김찬형",
+      "place": 181,
+      "x": 10,
+      "y": 13,
+      "graphics": "PYH",
+      "collider": false,
+      "detective": true,
+      "deathSound": "scream6",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "저 광주 시민임"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "정인중",
+      "place": 195,
+      "x": 8,
+      "y": 8,
+      "graphics": "PYH",
+      "collider": false,
+      "detective": true,
+      "deathSound": "scream7",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "프로그래밍 따위 껌이지 ㅋㅋ"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "유즈하",
+      "place": 174,
+      "x": 6,
+      "y": 15,
+      "graphics": "PYH",
+      "collider": false,
+      "detective": true,
+      "deathSound": "scream8",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "어서 이곳에서 나가고싶어..."
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "린네",
+      "place": 206,
+      "x": 10,
+      "y": 10,
+      "graphics": "PYH",
+      "collider": false,
+      "detective": true,
+      "deathSound": "scream9",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "룰루랄라"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "마도카",
+      "place": 197,
+      "x": 9,
+      "y": 6,
+      "graphics": "PYH",
+      "collider": false,
+      "detective": true,
+      "deathSound": "scream10",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "사랑은 아무나 하나"
+          ],
+          "fixed": false
+        }
+      }
+    },
+    {
+      "name": "수지",
+      "place": 186,
+      "x": 12,
+      "y": 13,
+      "graphics": "PYH",
+      "collider": false,
+      "detective": true,
+      "deathSound": "scream11",
+      "action": {
+        "command": "npc",
+        "arguments": {
+          "message": [
+            "가수 수지 아니에요... 형사 수지야"
           ],
           "fixed": false
         }

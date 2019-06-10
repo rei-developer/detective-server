@@ -1,4 +1,5 @@
 const {
+  JobsType,
   StatusType,
   DeathType
 } = require('./library/const')
@@ -64,7 +65,24 @@ class warrantMethod {
   constructor(args = {}) { }
 
   doing(self, item) {
-
+    const room = Room.get(self.roomId)
+    const { users } = room.places[self.place]
+    for (const user of users) {
+      if (self === user)
+        continue
+      if (!(self.x === user.x && self.y === user.y || self.x + self.direction.x === user.x && self.y - self.direction.y === user.y))
+        continue
+      if (user.game.jobs === JobsType.LAWYER) {
+        self.send(Serialize.UpdateRoomGameInfo('수색영장 결과', '수색영장', `${user.name}의 몸을 수색하고자 하였으나, 변호사이기 때문에 수색할 수 없었다.`))
+        return self.send(Serialize.PlaySound('result'))
+      }
+      let itemName = []
+      for (const item of user.game.inventory)
+        itemName.push(item.name)
+      self.send(Serialize.UpdateRoomGameInfo('수색영장 결과', '수색영장', `${user.name}의 몸을 수색해보니, <color=red>${itemName.join(', ')} 등</color>을 갖고 있었다.`))
+      return self.send(Serialize.PlaySound('result'))
+    }
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
   }
 }
 
@@ -77,6 +95,8 @@ class authorizationMethod {
     for (const event of events) {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>이용할 수 있는 대상이 아닙니다.</color>'))
       if (event.death < 1)
         return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const itemInfo = Item.get(event.death)
@@ -121,6 +141,8 @@ class magnifyingMethod {
     for (const event of events) {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>이용할 수 있는 대상이 아닙니다.</color>'))
       if (event.death < 1)
         return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const itemInfo = Item.get(event.death)
@@ -165,6 +187,8 @@ class poisonMethod {
     for (const event of events) {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>이용할 수 있는 대상이 아닙니다.</color>'))
       if (event.death < 1)
         return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const itemInfo = Item.get(event.death)
@@ -180,7 +204,14 @@ class gpsMethod {
   constructor(args = {}) { }
 
   doing(self, item) {
-
+    const room = Room.get(self.roomId)
+    let text = []
+    for (const user of room.mode.users)
+      text.push(`Map: ${user.place}, X: ${user.x}, Y: ${user.y}
+`)
+    text.push(`
+내 위치 - ${self.place}, X: ${self.x}, Y: ${self.y}`)
+    self.send(Serialize.UpdateRoomGameInfo('GPS 추적 결과', 'GPS 기기', text.join('')))
   }
 }
 
@@ -193,12 +224,128 @@ class plasticBagMethod {
     for (const event of events) {
       if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
         continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>이용할 수 있는 대상이 아닙니다.</color>'))
       if (event.death < 1)
         return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       event.death = item.id
       event.graphics = `${event.pureGraphics}_D`
       event.publishToMap(Serialize.SetGraphics(event))
       self.send(Serialize.InformMessage('<color=red>살해 현장의 모든 증거를 흔적도 없이 지웠다.</color>'))
+      return self.send(Serialize.PlaySound('result'))
+    }
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+  }
+}
+
+class researchMethod {
+  constructor(args = {}) { }
+
+  doing(self, item) {
+    const room = Room.get(self.roomId)
+    const { events } = room.places[self.place]
+    for (const event of events) {
+      if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
+        continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>이용할 수 있는 대상이 아닙니다.</color>'))
+      if (event.death < 1)
+        return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
+      const result = event.death === 8
+      self.send(Serialize.UpdateRoomGameInfo('정밀 분석기 결과', result ? '증거인멸 확인' : '이상 없음', `${event.name}의 시신을 확인해보니, ${result ? '증거인멸의 흔적이 보인다.' : '아무런 이상이 없는 것으로 판단된다.'}`))
+      return self.send(Serialize.PlaySound('result'))
+    }
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+  }
+}
+
+class shamanMethod {
+  constructor(args = {}) { }
+
+  doing(self, item) {
+    const room = Room.get(self.roomId)
+    const { events } = room.places[self.place]
+    for (const event of events) {
+      if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
+        continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>이용할 수 있는 대상이 아닙니다.</color>'))
+      if (event.death > 0)
+        return self.send(Serialize.InformMessage('<color=red>대상이 살은 상태가 아닙니다.</color>'))
+      event.target = self
+      self.send(Serialize.InformMessage(`<color=red>이제부터 ${event.name} 사망시 당신에게 바로 보고합니다.</color>`))
+      return self.send(Serialize.PlaySound('result'))
+    }
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+  }
+}
+
+class positionMethod {
+  constructor(args = {}) { }
+
+  doing(self, item) {
+    const room = Room.get(self.roomId)
+    room.publish(Serialize.NoticeMessage(`${self.name}님의 위치는 Map ${self.place}, X ${self.x}, Y ${self.y} 입니다.`))
+  }
+}
+
+class iceMethod {
+  constructor(args = {}) { }
+
+  doing(self, item) {
+    const room = Room.get(self.roomId)
+    const { events } = room.places[self.place]
+    for (const event of events) {
+      if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
+        continue
+      if (event.name !== '퓨즈')
+        return self.send(Serialize.InformMessage('<color=red>퓨즈가 아닙니다.</color>'))
+      event.deadCount = 30
+      self.send(Serialize.InformMessage(`<color=red>30초 후 퓨즈가 내려갑니다.</color>`))
+      return self.send(Serialize.PlaySound('result'))
+    }
+    self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
+  }
+}
+
+class recordMethod {
+  constructor(args = {}) { }
+
+  doing(self, item) {
+    const room = Room.get(self.roomId)
+    const array = item.id === 25 ? [1, 3, 4, 5, 7, 9, 11] : [2, 6, 8, 10]
+    const pick = Math.floor(Math.random() * array.length)
+    room.publish(Serialize.PlaySound(`scream${array[pick]}`))
+  }
+}
+
+class timerMethod {
+  constructor(args = {}) { }
+
+  doing(self, item) {
+    const room = Room.get(self.roomId)
+    room.mode.deadCount = 40
+    room.publish(Serialize.UpdateRoomModeInfo(room.mode))
+  }
+}
+
+class deathMethod {
+  constructor(args = {}) { }
+
+  doing(self, item) {
+    const room = Room.get(self.roomId)
+    const { events } = room.places[self.place]
+    for (const event of events) {
+      if (!(self.x === event.x && self.y === event.y || self.x + self.direction.x === event.x && self.y - self.direction.y === event.y))
+        continue
+      if (!event.detective)
+        return self.send(Serialize.InformMessage('<color=red>이용할 수 있는 대상이 아닙니다.</color>'))
+      if (event.death < 1)
+        return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
+      const id = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+      const pick = Math.random() * id
+      event.death = pick
+      self.send(Serialize.InformMessage('<color=red>살해 현장의 증거를 조작하였다.</color>'))
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -255,12 +402,13 @@ class weaponMethod {
       if (event.death > 0)
         return self.send(Serialize.InformMessage('<color=red>대상이 이미 죽었거나 음독 상태입니다.</color>'))
       ++room.mode.corpses
-      room.mode.deadCount = 30
+      room.mode.deadCount = 40
       self.publish(Serialize.UpdateRoomModeInfo(room.mode))
       self.send(Serialize.InformMessage(`<color=red>${event.name}${(pix.maker(event.name) ? '를' : '을')} ${item.name}${(pix.maker(item.name) ? '로' : '으로')} 죽였습니다.</color>`))
       ++self.score.kill
-      event.collider = false
       event.death = item.id
+      if (event.target)
+        event.target.send(Serialize.InformMessage(`강령술에 의해 ${event.name} 사망을 확인함.`))
       if (this.weaponSound !== '')
         self.publish(Serialize.PlaySound(this.weaponSound))
       if (item.type === DeathType.STRANGULATION || item.type === DeathType.NECKTIE_STRANGULATION || item.type === DeathType.POISON) {
@@ -285,6 +433,13 @@ module.exports = new Proxy({
   poison: poisonMethod,
   gps: gpsMethod,
   plasticBag: plasticBagMethod,
+  research: researchMethod,
+  shaman: shamanMethod,
+  position: positionMethod,
+  ice: iceMethod,
+  record: recordMethod,
+  timer: timerMethod,
+  death: deathMethod,
   silencer: silencerMethod,
   usePoison: usePoisonMethod,
   weapon: weaponMethod,

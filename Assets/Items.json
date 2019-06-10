@@ -9,7 +9,8 @@
       "name": "루미놀 검사 지시약",
       "description": "플레이어의 몸을 수색하여 혈흔 또는 씻어낸 흔적이 있는지 검사하는 도구.",
       "jobs": [
-        0
+        0,
+        11
       ],
       "killer": false,
       "use": true,
@@ -46,7 +47,8 @@
         1,
         4,
         6,
-        7
+        7,
+        9
       ],
       "killer": false,
       "use": true,
@@ -85,7 +87,8 @@
       "description": "살해당한 시신의 주변이 어떤 상황인지 살펴볼 수 있는 도구.",
       "jobs": [
         1,
-        2
+        2,
+        8
       ],
       "killer": false,
       "use": false,
@@ -103,7 +106,8 @@
       "name": "독극물 판별기",
       "description": "독극물에 의해 살해당했을 때 어떤 독극물이 쓰였는지 검출할 수 있는 도구.",
       "jobs": [
-        0
+        0,
+        8
       ],
       "killer": false,
       "use": true,
@@ -373,6 +377,140 @@
         "arguments": {
           "weaponSound": "samurai"
         }
+      }
+    },
+    {
+      "id": 22,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "authorization",
+      "name": "정밀 분석기",
+      "description": "시체에 사용 가능하며 증거조작, 인멸 여부를 확인할 수 있습니다.",
+      "jobs": [
+        8
+      ],
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "research",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 23,
+      "type": 0,
+      "num": 2,
+      "maxNum": 2,
+      "icon": "authorization",
+      "name": "강령술",
+      "description": "살아있는 NPC에게 다가가 강령술을 사용하면 해당 NPC가 사망했을 때 알림을 받아 생존 여부를 알 수 있다.",
+      "jobs": [
+        10
+      ],
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "shaman",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 23,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "authorization",
+      "name": "위치 공유기",
+      "description": "나의 위치를 모두에게 알려줍니다.",
+      "jobs": [
+        11
+      ],
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "position",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 24,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "authorization",
+      "name": "얼음",
+      "description": "퓨즈 앞에서 사용하면 30초 후 퓨즈가 자동으로 내려갑니다.",
+      "jobs": false,
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "ice",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 25,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "authorization",
+      "name": "녹음 테이프 (남)",
+      "description": "사용 즉시 남자의 비명소리를 출력합니다.",
+      "jobs": false,
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "record",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 26,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "authorization",
+      "name": "녹음 테이프 (여)",
+      "description": "사용 즉시 여자의 비명소리를 출력합니다.",
+      "jobs": false,
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "record",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 27,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "authorization",
+      "name": "초시계",
+      "description": "사용 즉시 화면 상단에 타이머를 재생합니다.",
+      "jobs": false,
+      "killer": false,
+      "use": true,
+      "method": {
+        "command": "timer",
+        "arguments": {}
+      }
+    },
+    {
+      "id": 28,
+      "type": 0,
+      "num": 1,
+      "maxNum": 1,
+      "icon": "plasticBag",
+      "name": "사인 조작",
+      "description": "시체에게 다가가 사용하면 아무 사인으로 바꿔줍니다.",
+      "jobs": false,
+      "killer": true,
+      "use": true,
+      "method": {
+        "command": "death",
+        "arguments": {}
       }
     }
   ]

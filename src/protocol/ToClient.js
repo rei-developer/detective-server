@@ -36,6 +36,7 @@ module.exports = {
     'GET_VOTE',
     'SET_UP_VOTE',
     'CLOSE_VOTE',
+    'SET_UP_USER_LIKES',
     'DEAD_ANIMATION',
     'RESULT_GAME',
     'ENTER_WARDROBE',

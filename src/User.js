@@ -1,7 +1,4 @@
-const {
-  TeamType,
-  RoomType
-} = require('./library/const')
+const { RoomType } = require('./library/const')
 const filtering = require('./library/filtering-text')
 const pix = require('./library/pix')
 const Serialize = require('./protocol/Serialize')
@@ -38,6 +35,7 @@ global.User = (function () {
       this.maxExp = this.getMaxExp()
       this.coin = 1000000
       this.cash = 0
+      this.likes = 0
       this.escape = 0
       this.kill = 0
       this.death = 0
@@ -140,6 +138,7 @@ global.User = (function () {
       this.maxExp = this.getMaxExp()
       this.coin = user.coin
       this.cash = user.cash
+      this.likes = user.likes
       this.escape = user.escape
       this.kill = user.kill
       this.death = user.death
@@ -420,7 +419,7 @@ global.User = (function () {
     }
 
     chatting(message) {
-      this.publish(Serialize.ChatMessage(this.type, this.index, `<color=#00A2E8>${this.name}</color>`, message))
+      this.publish(Serialize.ChatMessage(this.type, this.index, `<color=#00A2E8>${this.game.no ? '[' + this.game.no + '] ' : ''}${this.name}</color>`, message))
     }
 
     entry(type = RoomType.GAME) {
@@ -468,6 +467,18 @@ global.User = (function () {
     selectVote(index) {
       if (!this.roomId) return
       Room.get(this.roomId).selectVote(this, index)
+    }
+
+    setUpUserLikes(index) {
+      const findIndex = User.users.findIndex(user => user.index === index)
+      if (findIndex < 0)
+        return
+      const user = User.users[findIndex]
+      if (!user || !this.game.likes)
+        return
+      ++user.likes
+      this.game.likes = false
+      this.send(Serialize.SetUpUserLikes(index, user.likes))
     }
 
     portal(place, x, y, dx = 0, dy = 0) {

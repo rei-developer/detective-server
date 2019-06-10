@@ -68,11 +68,12 @@ module.exports = {
   },
   async UpdateUser(user) {
     try {
-      await this.query('UPDATE users SET `uuid` = ?, `level` = ?, `exp` = ?, `coin` = ?, `escape` = ?, `kill` = ?, `death` = ?, `assist` = ?, `blast` = ?, `rescue` = ?, `rescue_combo` = ?, `survive` = ?, `graphics` = ?, `memo` = ?, `last_chat` = ? WHERE `id` = ?', [
+      await this.query('UPDATE users SET `uuid` = ?, `level` = ?, `exp` = ?, `coin` = ?, `likes` = ?, `escape` = ?, `kill` = ?, `death` = ?, `assist` = ?, `blast` = ?, `rescue` = ?, `rescue_combo` = ?, `survive` = ?, `graphics` = ?, `memo` = ?, `last_chat` = ? WHERE `id` = ?', [
         user.verify.uuid,
         user.level,
         user.exp,
         user.coin,
+        user.likes,
         user.escape,
         user.kill,
         user.death,

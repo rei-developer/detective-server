@@ -11,7 +11,11 @@ const JobsType = {
   JOBLESS: 4,
   HOUSEWIFE: 5,
   SOLDIER: 6,
-  EMPLOYEE: 7
+  EMPLOYEE: 7,
+  RESEARCHER: 8,
+  LAWYER: 9,
+  SHAMAN: 10,
+  ARBEIT: 11
 }
 
 const RoomType = {

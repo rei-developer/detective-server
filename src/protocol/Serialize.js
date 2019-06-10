@@ -231,7 +231,7 @@ my.AddItem = function (self, item = []) {
   packet.name = item.name
   packet.description = item.description
   packet.jobs = item.jobs ? (item.jobs.indexOf(self.game.jobs) < 0 ? false : true) : true,
-  packet.killer = item.killer
+    packet.killer = item.killer
   return JSON.stringify(packet)
 }
 
@@ -288,7 +288,7 @@ my.AddTrash = function (self, trash = []) {
   packet.name = trash.name
   packet.description = trash.description
   packet.jobs = trash.jobs ? (trash.jobs.indexOf(self.game.jobs) < 0 ? false : true) : true,
-  packet.killer = trash.killer
+    packet.killer = trash.killer
   return JSON.stringify(packet)
 }
 
@@ -342,20 +342,32 @@ my.CloseVote = function () {
   return JSON.stringify(packet)
 }
 
+my.SetUpUserLikes = function (index, likes) {
+  const packet = {}
+  packet._head = ToClient.SET_UP_USER_LIKES
+  packet.index = index
+  packet.likes = likes
+  return JSON.stringify(packet)
+}
+
 my.DeadAnimation = function () {
   const packet = {}
   packet._head = ToClient.DEAD_ANIMATION
   return JSON.stringify(packet)
 }
 
-my.ResultGame = function (ending, rank, persons, mission, reward) {
+my.ResultGame = function (ending, users) {
   const packet = {}
   packet._head = ToClient.RESULT_GAME
   packet.ending = ending
-  packet.rank = rank
-  packet.persons = persons
-  packet.mission = mission
-  packet.reward = reward
+  packet.users = users.map(i => ({
+    index: i.index,
+    rank: users.indexOf(i) + 1,
+    name: i.name,
+    team: i.game.team,
+    jobs: i.game.jobs,
+    rp: i.reward.exp
+  }))
   return JSON.stringify(packet)
 }
 
