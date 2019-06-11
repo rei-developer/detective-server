@@ -127,10 +127,28 @@ my.PlaySound = function (name) {
   return JSON.stringify(packet)
 }
 
-my.UpdateRoomUserCount = function (count) {
+my.GetRoomUser = function (users = []) {
   const packet = {}
-  packet._head = ToClient.UPDATE_ROOM_USER_COUNT
-  packet.count = count
+  packet._head = ToClient.GET_ROOM_USER
+  packet.users = users.map(i => ({
+    index: i.index,
+    name: i.name
+  }))
+  return JSON.stringify(packet)
+}
+
+my.AddRoomUser = function (user) {
+  const packet = {}
+  packet._head = ToClient.ADD_ROOM_USER
+  packet.index = user.index
+  packet.name = user.name
+  return JSON.stringify(packet)
+}
+
+my.RemoveRoomUser = function (index) {
+  const packet = {}
+  packet._head = ToClient.REMOVE_ROOM_USER
+  packet.index = index
   return JSON.stringify(packet)
 }
 

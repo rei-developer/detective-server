@@ -372,7 +372,7 @@ class NpcAction {
         --event.deathCount
       if (event.deathCount === 1) {
         ++room.mode.corpses
-        room.mode.deadCount = 40
+        room.mode.deadCount = room.mode.pureDeadCount
         if (event.target)
           event.target.send(Serialize.InformMessage(`강령술에 의해 ${event.name} 사망을 확인함.`))
         event.publish(Serialize.UpdateRoomModeInfo(room.mode))

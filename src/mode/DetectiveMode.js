@@ -28,6 +28,7 @@ module.exports = class DetectiveMode {
     this.count = 600
     this.maxCount = 600
     this.deadCount = 0
+    this.pureDeadCount = 40
     this.fuse = false
     this.corpses = 0
     this.target = null
@@ -68,7 +69,8 @@ module.exports = class DetectiveMode {
       washer: false,
       sink: false,
       likes: true,
-      result: false
+      result: false,
+      poison: new Date().getTime()
     }
   }
 
@@ -194,7 +196,7 @@ module.exports = class DetectiveMode {
     if (itemInfo.killer) {
       if (self.game.team === TeamType.KILLER) {
         if (this.deadCount > 0)
-          return self.send(Serialize.InformMessage(`<color=red>${this.deadCount}초 후에 살해할 수 있습니다.</color>`))
+          return self.send(Serialize.InformMessage(`<color=red>${this.deadCount}초 후에 사용할 수 있습니다.</color>`))
       } else {
         return self.send(Serialize.InformMessage('<color=red>살인자 전용 도구입니다.</color>'))
       }

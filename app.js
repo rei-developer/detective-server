@@ -35,8 +35,8 @@ const androidpublisher = require('./src/api/androidpublisher')
 const app = new Koa()
 const router = new Router()
 
-const VERSION = '0.1.7'
-const PORT = 10017
+const VERSION = '0.1.9'
+const PORT = 10019
 
 router.get('/', ctx => {
   ctx.body = VERSION

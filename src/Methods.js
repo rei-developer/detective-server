@@ -366,6 +366,9 @@ class usePoisonMethod {
   }
 
   doing(self, item) {
+    const seconds = Math.floor((self.game.poison - new Date().getTime()) / 1000)
+    if (seconds > 0)
+      return self.send(Serialize.InformMessage(`<color=red>${seconds}초 후에 사용할 수 있습니다.</color>`))
     const room = Room.get(self.roomId)
     const { events } = room.places[self.place]
     for (const event of events) {
@@ -377,6 +380,8 @@ class usePoisonMethod {
         return self.send(Serialize.InformMessage('<color=red>대상이 이미 죽었거나 음독 상태입니다.</color>'))
       self.send(Serialize.InformMessage(`<color=red>${event.name}에게 ${item.name}${(pix.maker(item.name) ? '를' : '을')} 강제로 먹였습니다.</color>`))
       self.publishToMap(Serialize.PlaySound('drink'))
+      const cooltime = new Date().getTime() + ((this.timer + room.mode.pureDeadCount) * 1000)
+      self.game.poison = cooltime
       ++self.score.kill
       event.death = item.id
       event.deathCount = this.timer * 10
@@ -402,7 +407,7 @@ class weaponMethod {
       if (event.death > 0)
         return self.send(Serialize.InformMessage('<color=red>대상이 이미 죽었거나 음독 상태입니다.</color>'))
       ++room.mode.corpses
-      room.mode.deadCount = 40
+      room.mode.deadCount = room.mode.pureDeadCount
       self.publish(Serialize.UpdateRoomModeInfo(room.mode))
       self.send(Serialize.InformMessage(`<color=red>${event.name}${(pix.maker(event.name) ? '를' : '을')} ${item.name}${(pix.maker(item.name) ? '로' : '으로')} 죽였습니다.</color>`))
       ++self.score.kill

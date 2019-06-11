@@ -107,6 +107,7 @@ global.Room = (function () {
     }
 
     addUser(user) {
+      this.publish(Serialize.AddRoomUser(user))
       user.roomId = this.index
       this.users.push(user)
       this.places[user.place].addUser(user)
@@ -230,14 +231,14 @@ global.Room = (function () {
     join(self) {
       this.addUser(self)
       this.mode.join(self)
-      this.publish(Serialize.UpdateRoomUserCount(this.users.length))
+      self.send(Serialize.GetRoomUser(this.users))
     }
 
     leave(self) {
       this.mode.leave(self)
       this.removeUser(self)
       this.publishToMap(self.place, Serialize.RemoveGameObject(self))
-      this.publish(Serialize.UpdateRoomUserCount(this.users.length))
+      this.publish(Serialize.RemoveRoomUser(self.index))
       if (this.users.length <= 0)
         Room.remove(this)
     }

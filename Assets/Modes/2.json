@@ -136,7 +136,7 @@
       "place": 189,
       "x": 8,
       "y": 7,
-      "graphics": "PYH",
+      "graphics": "ISJ",
       "collider": false,
       "detective": true,
       "deathSound": "scream1",
