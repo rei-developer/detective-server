@@ -2,9 +2,9 @@
   "1": [
     {
       "name": "추리대",
-      "place": 173,
-      "x": 11,
-      "y": 7,
+      "place": 186,
+      "x": 10,
+      "y": 12,
       "graphics": "kinkob",
       "collider": true,
       "action": {
@@ -13,24 +13,13 @@
     },
     {
       "name": "퓨즈",
-      "place": 183,
-      "x": 10,
+      "place": 197,
+      "x": 12,
       "y": 4,
       "graphics": "kinkob",
       "collider": true,
       "action": {
         "command": "fuse"
-      }
-    },
-    {
-      "name": "쓰레기통",
-      "place": 174,
-      "x": 12,
-      "y": 14,
-      "graphics": "washer",
-      "collider": true,
-      "action": {
-        "command": "trash"
       }
     },
     {
@@ -57,41 +46,8 @@
     },
     {
       "name": "쓰레기통",
-      "place": 194,
-      "x": 8,
-      "y": 5,
-      "graphics": "washer",
-      "collider": true,
-      "action": {
-        "command": "trash"
-      }
-    },
-    {
-      "name": "쓰레기통",
       "place": 197,
       "x": 10,
-      "y": 5,
-      "graphics": "washer",
-      "collider": true,
-      "action": {
-        "command": "trash"
-      }
-    },
-    {
-      "name": "쓰레기통",
-      "place": 202,
-      "x": 12,
-      "y": 5,
-      "graphics": "washer",
-      "collider": true,
-      "action": {
-        "command": "trash"
-      }
-    },
-    {
-      "name": "쓰레기통",
-      "place": 206,
-      "x": 7,
       "y": 5,
       "graphics": "washer",
       "collider": true,
@@ -178,7 +134,7 @@
       "place": 204,
       "x": 8,
       "y": 10,
-      "graphics": "PYH",
+      "graphics": "KJT",
       "collider": false,
       "detective": true,
       "deathSound": "scream3",
@@ -327,9 +283,9 @@
     },
     {
       "name": "수지",
-      "place": 186,
-      "x": 12,
-      "y": 13,
+      "place": 187,
+      "x": 10,
+      "y": 5,
       "graphics": "PYH",
       "collider": false,
       "detective": true,

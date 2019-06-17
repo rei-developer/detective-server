@@ -22,6 +22,7 @@ global.User = (function () {
       this.socket = socket
       this.verify = verify
       this.roomId = 0
+      this.roomUserNo = 0
       this.place = 1
       this.game = {}
       this.score = new Score()
@@ -54,8 +55,8 @@ global.User = (function () {
       this.clan = null
       return (async () => {
         if (verify === 'test') {
-          // this.verify = { id: 110409668035092753325, loginType: 0}
-          this.verify = { id: 113049585880204162131, loginType: 0 }
+          this.verify = { id: 110409668035092753325, loginType: 0}
+          // this.verify = { id: 113049585880204162131, loginType: 0 }
           await this.loadUserData()
           return this
         }
@@ -303,7 +304,8 @@ global.User = (function () {
     }
 
     command(message) {
-      if (this.admin === 0) return false
+      if (this.admin < 1)
+        return false
       if (message.substring(0, 1) === '#') {
         this.notice(Serialize.SystemMessage('<color=#EFE4B0>@[' + (this.admin === 1 ? '운영자' : '개발자') + '] ' + this.name + ': ' + message.substring(1) + '</color>'))
         return true
@@ -419,7 +421,7 @@ global.User = (function () {
     }
 
     chatting(message) {
-      this.publish(Serialize.ChatMessage(this.type, this.index, `<color=#00A2E8>${this.game.no ? '[' + this.game.no + '] ' : ''}${this.name}</color>`, message))
+      this.publish(Serialize.ChatMessage(this.type, this.index, `<color=#00A2E8>${this.roomUserNo > 0 ? '[' + this.roomUserNo + '] ' : ''}${this.name}</color>`, message))
     }
 
     entry(type = RoomType.GAME) {

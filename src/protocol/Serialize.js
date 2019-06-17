@@ -101,7 +101,7 @@ my.CreateGameObject = function (obj, hide = false) {
   packet.clanname = hide ? '' : (obj.clan && obj.clan.name || '')
   packet.type = obj.type
   packet.name = hide ? '' : obj.name
-  packet.no = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('no')) ? obj.game.no : 0
+  packet.no = obj.roomUserNo
   packet.team = (obj.hasOwnProperty('game') && obj.game.hasOwnProperty('team')) ? obj.game.team : TeamType.CITIZEN
   packet.graphics = obj.graphics
   packet.x = obj.x
@@ -132,7 +132,7 @@ my.GetRoomUser = function (users = []) {
   packet._head = ToClient.GET_ROOM_USER
   packet.users = users.map(i => ({
     index: i.index,
-    name: i.name
+    name: `[${i.roomUserNo}] ${i.name}`
   }))
   return JSON.stringify(packet)
 }
@@ -141,7 +141,7 @@ my.AddRoomUser = function (user) {
   const packet = {}
   packet._head = ToClient.ADD_ROOM_USER
   packet.index = user.index
-  packet.name = user.name
+  packet.name = `[${user.roomUserNo}] ${user.name}`
   return JSON.stringify(packet)
 }
 
@@ -176,7 +176,7 @@ my.UpdateRoomGameInfo = function (label, title, description) {
 my.SetGameNo = function (obj) {
   const packet = {}
   packet._head = ToClient.SET_GAME_NO
-  packet.no = obj.game.no
+  packet.no = obj.roomUserNo
   return JSON.stringify(packet)
 }
 
@@ -291,7 +291,7 @@ my.GetTrash = function (self, trash = [], trashUsers = []) {
   packet.trashUsers = trashUsers.map(i => ({
     index: i.index,
     name: i.name,
-    no: (i.hasOwnProperty('game') && i.game.hasOwnProperty('no')) ? i.game.no : 0
+    no: i.roomUserNo
   }))
   return JSON.stringify(packet)
 }
@@ -322,7 +322,7 @@ my.AddUserTrash = function (user, count) {
   packet._head = ToClient.ADD_USER_TRASH
   packet.index = user.index
   packet.name = user.name
-  packet.no = (user.hasOwnProperty('game') && user.game.hasOwnProperty('no')) ? user.game.no : 0
+  packet.no = user.roomUserNo
   packet.count = count
   return JSON.stringify(packet)
 }
@@ -341,7 +341,7 @@ my.GetVote = function (users = []) {
   packet.users = users.map(i => ({
     index: i.index,
     name: i.name,
-    no: (i.hasOwnProperty('game') && i.game.hasOwnProperty('no')) ? i.game.no : 0
+    no: i.roomUserNo
   }))
   return JSON.stringify(packet)
 }

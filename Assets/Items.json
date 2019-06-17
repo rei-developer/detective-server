@@ -80,8 +80,8 @@
     {
       "id": 5,
       "type": 0,
-      "num": 1,
-      "maxNum": 1,
+      "num": 4,
+      "maxNum": 4,
       "icon": "magnifying",
       "name": "돋보기",
       "description": "살해당한 시신의 주변이 어떤 상황인지 살펴볼 수 있는 도구.",
@@ -91,7 +91,7 @@
         8
       ],
       "killer": false,
-      "use": false,
+      "use": true,
       "method": {
         "command": "magnifying",
         "arguments": {}

@@ -34,7 +34,7 @@ module.exports = class GameMode {
   moveToBase(self) {
     switch (this.map) {
       case MapType.ISLAND:
-        self.teleport(2, 8, 13)
+        self.teleport(173, 11, 9)
         break
     }
   }
@@ -42,6 +42,7 @@ module.exports = class GameMode {
   join(self) {
     self.game = {}
     self.setGraphics(self.graphics)
+    self.send(Serialize.SetGameNo(self))
     this.moveToBase(self)
   }
 

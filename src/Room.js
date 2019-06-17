@@ -46,6 +46,7 @@ global.Room = (function () {
     }
 
     static remove(room) {
+      console.log(`${room.index}번 방 게임 종료.`)
       room.stop()
       Room.rooms[room.index] = null
       delete Room.rooms[room.index]
@@ -68,18 +69,21 @@ global.Room = (function () {
 
     constructor(type = RoomType.PLAYGROUND) {
       this.index = 0
+      this.max = 10
       this.type = type
       this.users = []
+      this.picks = []
+      for (let i = 0; i < this.max; i++)
+        this.picks.push(true)
       this.places = new Proxy({}, {
         get: (target, name) => {
           return target.hasOwnProperty(name) ? target[name] : target[name] = new Place(this.index, name)
         }
       })
-      this.max = 12
+      this.nextEventIndex = 1
       this.mode = null
       this.loop = null
       this.isRunning = false
-      this.nextEventIndex = 1
       this.lock = false
       this.start()
     }
@@ -107,8 +111,16 @@ global.Room = (function () {
     }
 
     addUser(user) {
-      this.publish(Serialize.AddRoomUser(user))
       user.roomId = this.index
+      for (let i = 0; i < this.picks.length; i++) {
+        const pick = this.picks[i]
+        if (pick) {
+          this.picks[i] = false
+          user.roomUserNo = i + 1
+          break
+        }
+      }
+      this.publish(Serialize.AddRoomUser(user))
       this.users.push(user)
       this.places[user.place].addUser(user)
     }
@@ -116,7 +128,13 @@ global.Room = (function () {
     removeUser(user) {
       this.users.splice(this.users.indexOf(user), 1)
       this.places[user.place].removeUser(user)
+      const index = user.roomUserNo - 1
+      const pick = this.picks[index]
+      if (pick)
+        return
       user.roomId = 0
+      user.roomUserNo = 0
+      this.picks[index] = true
     }
 
     changeMode(mode) {

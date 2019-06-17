@@ -74,8 +74,7 @@ module.exports = class PlayGroundMode {
   selectVote(self, index) { }
 
   spawnRabbit() {
-    const range = 6
-    const objects = require('../Assets/Mods/Eve000.json')[2]
+    /*const objects = require(`../../Assets/Modes/${this.type}.json`)[2]
     for (const object of objects) {
       const range = 3
       for (let i = 0; i < 10; i++) {
@@ -90,7 +89,7 @@ module.exports = class PlayGroundMode {
       }
     }
     this.room.publish(Serialize.NoticeMessage('토깽이를 잡고 실력을 키우자! (아침 9시 ~ 자정)'))
-    this.room.publish(Serialize.PlaySound('Bikkuri'))
+    this.room.publish(Serialize.PlaySound('Bikkuri'))*/
   }
 
   update() {

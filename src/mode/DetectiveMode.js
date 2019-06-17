@@ -22,6 +22,7 @@ module.exports = class DetectiveMode {
     this.type = ModeType.DETECTIVE
     this.map = MapType.ISLAND
     this.users = []
+    this.jobs = [...Array(12)].map((_, i) => i).sort(() => Math.random() - Math.random())
     this.trash = []
     this.trashUsers = []
     this.nextTrashIndex = 0
@@ -54,7 +55,6 @@ module.exports = class DetectiveMode {
 
   gameObject() {
     return {
-      no: 0,
       team: TeamType.CITIZEN,
       jobs: JobsType.DOCTOR,
       status: [],
@@ -76,13 +76,20 @@ module.exports = class DetectiveMode {
 
   join(self) {
     self.game = this.gameObject()
-    self.game.no = this.users.indexOf(self) + 1
     self.setGraphics(self.graphics)
-    this.users.push(self)
-    this.moveToBase(self)
     self.send(Serialize.SetGameNo(self))
     self.publishToMap(Serialize.SetGameTeam(self))
     self.publish(Serialize.ModeData(this))
+    this.users.push(self)
+    this.moveToBase(self)
+    if (this.room.lock || this.state !== STATE_GAME)
+      return
+    self.game.jobs = this.jobs[self.roomUserNo - 1]
+    self.send(Serialize.SetGameJobs(self))
+    const items = [...Array(Object.keys(Item.items).length - 1)].map((_, i) => i).sort(() => Math.random() - Math.random())
+    for (let i = 0; i < 5; i++)
+      this.addItem(self, items[i] + 1)
+    self.send(Serialize.PlaySound('Shock'))
   }
 
   leave(self) {
@@ -107,10 +114,37 @@ module.exports = class DetectiveMode {
     }
   }
 
+  moveToRandom(self) {
+    try {
+      switch (this.map) {
+        case MapType.ISLAND:
+          const random = [
+            [174, 10, 7],
+            [174, 12, 7],
+            [185, 12, 18],
+            [185, 14, 18],
+            [192, 14, 9],
+            [192, 16, 9],
+            [196, 9, 6],
+            [196, 11, 6],
+            [204, 7, 14],
+            [204, 9, 14],
+            [207, 9, 11],
+            [207, 11, 11]
+          ]
+          if (self.roomUserNo >= 1 && self.roomUserNo < this.room.max)
+            self.teleport(random[self.roomUserNo - 1][0], random[self.roomUserNo - 1][1], random[self.roomUserNo - 1][2])
+          break
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   moveToVote(self) {
     switch (this.map) {
       case MapType.ISLAND:
-        self.teleport(13, 11, 15)
+        self.teleport(255, 20, 14)
         break
     }
   }
@@ -319,11 +353,15 @@ module.exports = class DetectiveMode {
   }
 
   vote(name) {
+    this.room.lock = true
     this.count = 50
+    this.fuse = false
     this.state = STATE_VOTE
-    for (const user of this.users)
+    for (const user of this.users) {
       this.moveToVote(user)
-    this.room.publish(Serialize.NoticeMessage(`${name}님의 요청으로 추리를 시작하겠습니다.`))
+      this.drawFuse(user)
+    }
+    this.room.publish(Serialize.NoticeMessage(`<color=red>${name}</color>님의 요청으로 추리를 시작하겠습니다.`))
     this.room.publish(Serialize.PlaySound('squeaky'))
   }
 
@@ -332,24 +370,20 @@ module.exports = class DetectiveMode {
     const slice = this.room.users.slice(0)
     for (const user of slice) {
       if (ending === EndingType.KILLER && user.game.team === TeamType.KILLER)
-        user.score.sum += user.score.kill * 20
+        user.score.sum += (user.score.kill * 20) + (user.score.assist * 10)
       else if (ending === EndingType.CITIZEN && user.game.team === TeamType.CITIZEN) {
         if (user.game.vote === this.target)
           user.score.sum += 50
-        user.score.sum += 50
+        user.score.sum += user.score.assist * 20
       } else if (ending === EndingType.DRAW)
-        user.score.sum += 50
+        user.score.sum += 20
       user.roomId = 0
       user.game.result = true
     }
     const ranks = slice.sort((a, b) => b.score.sum - a.score.sum)
     for (const user of this.users) {
-      let exp = 100 + user.score.sum
-      let coin = 50 + parseInt(user.score.sum / 2)
-      if (exp < 100)
-        exp = 100
-      if (coin < 50)
-        coin = 50
+      let exp = user.score.sum
+      let coin = Math.floor(user.score.sum / 2) + 50
       user.reward.exp = exp
       user.reward.coin = coin
     }
@@ -367,8 +401,8 @@ module.exports = class DetectiveMode {
               this.room.publish(Serialize.PlaySound('GhostsTen'))
             this.room.publish(Serialize.NoticeMessage(this.count - 570))
           } else if (this.count === 570) {
-            this.room.lock = true
             this.state = STATE_GAME
+            console.log(this.roomId + '번 방 게임 시작.')
             const killer = pix.sample(this.users)[0]
             if (killer) {
               killer.game.team = TeamType.KILLER
@@ -380,15 +414,16 @@ module.exports = class DetectiveMode {
               }
               killer.send(Serialize.SetGameTeam(killer))
             }
-            const jobs = [...Array(JobsType.ARBEIT)].map((_, i) => i).sort(() => Math.random() - Math.random())
-            this.users.map((user, index) => {
-              user.game.jobs = jobs[index]
+            this.users.map(user => {
+              this.moveToRandom(user)
+              user.game.jobs = this.jobs[user.roomUserNo - 1]
               user.send(Serialize.SetGameJobs(user))
               const items = [...Array(Object.keys(Item.items).length - 1)].map((_, i) => i).sort(() => Math.random() - Math.random())
-              for (let i = 0; i < 5; i++)
+              for (let i = 0; i < 3; i++)
                 this.addItem(user, items[i] + 1)
             })
             this.randomSupply()
+            this.publishToCitizen(Serialize.NoticeMessage('도구를 이용하지 않거나 잠수를 타면 경험치를 얻지 못합니다.'))
             this.room.publish(Serialize.PlaySound('Shock'))
           }
           break

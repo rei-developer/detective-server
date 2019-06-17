@@ -27,6 +27,8 @@ class LuminorMethod {
       const washedBlood = user.game.status.find(s => s === StatusType.WASHED_BLOOD)
       const result = blood || washedBlood ? true : false
       self.send(Serialize.UpdateRoomGameInfo('루미놀 검사 결과', result ? '양성' : '음성', `${user.name}의 몸을 루미놀 검사 지시약으로 판독해보니, ${result ? '혈흔이 묻혀진 것으로 판단된다.' : '아무런 이상이 없는 것으로 판단된다.'}`))
+      if (result)
+        ++self.score.assist
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -55,6 +57,8 @@ class glovesMethod {
       if (dust)
         status.push('먼지')
       self.send(Serialize.UpdateRoomGameInfo('몸 수색 결과', status.length > 0 ? '의심 정황' : '이상 없음', `${user.name}의 몸을 수색해보니, ${status.length > 0 ? status.join(', ') + ' 등이 묻혀있다.' : '아무런 이상이 없는 것으로 판단된다.'}`))
+      if (status.length > 0)
+        ++self.score.assist
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -79,7 +83,11 @@ class warrantMethod {
       let itemName = []
       for (const item of user.game.inventory)
         itemName.push(item.name)
-      self.send(Serialize.UpdateRoomGameInfo('수색영장 결과', '수색영장', `${user.name}의 몸을 수색해보니, <color=red>${itemName.join(', ')} 등</color>을 갖고 있었다.`))
+      if (itemName.length > 0) {
+        self.send(Serialize.UpdateRoomGameInfo('수색영장 결과', '수색영장', `${user.name}의 몸을 수색해보니, <color=red>${itemName.join(', ')}</color>을 갖고 있었다.`))
+        ++self.score.assist
+      } else
+        self.send(Serialize.UpdateRoomGameInfo('수색영장 결과', '수색영장', `${user.name}의 몸을 수색해보니, 아무런 도구도 갖고 있지 않다.`))
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -126,6 +134,8 @@ class authorizationMethod {
           break
       }
       self.send(Serialize.UpdateRoomGameInfo('시신 부검 결과', flag ? '의심 정황' : '이상 없음', `${event.name}의 시신을 부검해보니, ${flag ? message : '외관상 특별한 것이 없다.'}`))
+      if (flag)
+        ++self.score.assist
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -172,6 +182,8 @@ class magnifyingMethod {
           break
       }
       self.send(Serialize.UpdateRoomGameInfo('돋보기 판단 결과', flag ? '의심 정황' : '이상 없음', `${event.name}의 시신의 주변을 살펴보니, ${flag ? message : '외관상 별다른 것이 없다.'}`))
+      if (flag)
+        ++self.score.assist
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -194,6 +206,8 @@ class poisonMethod {
       const itemInfo = Item.get(event.death)
       const flag = itemInfo.type === DeathType.POISON
       self.send(Serialize.UpdateRoomGameInfo('독극물 판별 결과', flag ? '의심 정황' : '이상 없음', `어떤 독극물이 쓰였는지 ${event.name}의 시신을 판별해본 결과, ${flag ? itemInfo.name + (pix.maker(itemInfo.name) ? '를' : '을') + ' 쓴 것으로 확인되었다.' : '외관상 별다른 것이 없다.'}`))
+      if (flag)
+        ++self.score.assist
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -253,6 +267,8 @@ class researchMethod {
         return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const result = event.death === 8
       self.send(Serialize.UpdateRoomGameInfo('정밀 분석기 결과', result ? '증거인멸 확인' : '이상 없음', `${event.name}의 시신을 확인해보니, ${result ? '증거인멸의 흔적이 보인다.' : '아무런 이상이 없는 것으로 판단된다.'}`))
+      if (result)
+        ++self.score.assist
       return self.send(Serialize.PlaySound('result'))
     }
     self.send(Serialize.InformMessage('<color=red>앞에 대상이 없습니다.</color>'))
@@ -286,6 +302,7 @@ class positionMethod {
   doing(self, item) {
     const room = Room.get(self.roomId)
     room.publish(Serialize.NoticeMessage(`${self.name}님의 위치는 Map ${self.place}, X ${self.x}, Y ${self.y} 입니다.`))
+    ++self.score.assist
   }
 }
 
@@ -343,7 +360,7 @@ class deathMethod {
       if (event.death < 1)
         return self.send(Serialize.InformMessage('<color=red>대상이 죽은 상태가 아닙니다.</color>'))
       const id = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-      const pick = Math.random() * id
+      const pick = Math.floor(Math.random() * id.length)
       event.death = pick
       self.send(Serialize.InformMessage('<color=red>살해 현장의 증거를 조작하였다.</color>'))
       return self.send(Serialize.PlaySound('result'))

@@ -46,9 +46,7 @@ class HingedDoorAction {
 }
 
 class VoteAction {
-  constructor(args = {}) {
-    this.count = 0
-  }
+  constructor(args = {}) { }
 
   doing(self, event) {
     const room = Room.get(self.roomId)
@@ -373,8 +371,10 @@ class NpcAction {
       if (event.deathCount === 1) {
         ++room.mode.corpses
         room.mode.deadCount = room.mode.pureDeadCount
-        if (event.target)
+        if (event.target) {
           event.target.send(Serialize.InformMessage(`강령술에 의해 ${event.name} 사망을 확인함.`))
+          ++event.target.score.assist
+        }
         event.publish(Serialize.UpdateRoomModeInfo(room.mode))
         event.graphics = `${event.graphics}_D`
         event.publishToMap(Serialize.SetGraphics(event))

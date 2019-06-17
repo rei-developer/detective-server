@@ -6,7 +6,7 @@ require('./src/User')
 const lex = require('greenlock-koa').create({
   version: 'draft-11',
   configDir: '/etc/letsencrypts',
-  server: 'production', //'https://acme-v02-staging.api.letsencrypt.org/directory',
+  server: 'production',
   approveDomains: (opts, certs, cb) => {
     if (certs) {
       opts.domains = ['sandspoon.com']
@@ -22,7 +22,6 @@ const lex = require('greenlock-koa').create({
   renewBy: 80 * 24 * 60 * 60 * 1000
 })
 
-const http = require('http')
 const https = require('https')
 const Koa = require('koa')
 const Router = require('koa-router')
@@ -35,8 +34,8 @@ const androidpublisher = require('./src/api/androidpublisher')
 const app = new Koa()
 const router = new Router()
 
-const VERSION = '0.1.9'
-const PORT = 10019
+const VERSION = '0.2.1'
+const PORT = 10021
 
 router.get('/', ctx => {
   ctx.body = VERSION
@@ -66,10 +65,10 @@ async function start() {
       }
     }, 1000 * 300)
     https.createServer(lex.httpsOptions, lex.middleware(app.callback())).listen(443)
-    http.createServer(lex.middleware(require('redirect-https')())).listen(80)
     new Server().run(PORT)
     console.log('server is running.')
   } catch (e) {
+    console.log('A')
     console.log(e)
   }
 }

@@ -45,6 +45,7 @@ module.exports = class Server {
         try {
           ws.ping(buffer)
         } catch (e) {
+          console.log('C')
           console.error(e)
         }
       })
@@ -84,9 +85,11 @@ module.exports = class Server {
         })
         socket.on('close', async () => this.onDisconnect(socket))
       } catch (e) {
+        console.log('D')
         console.log(e)
       }
     } catch (e) {
+      console.log('E')
       console.log(e)
     }
   }
@@ -190,6 +193,7 @@ module.exports = class Server {
       delete socket.user
       console.log(user.name + ' 종료 (동시접속자: ' + User.users.length + '명)')
     } catch (e) {
+      console.log('B')
       console.log(e.message)
     }
   }
